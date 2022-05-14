@@ -1,0 +1,6 @@
+Base path: '/Applications/Unity/Unity.app/Contents', plugins path '/Applications/Unity/Unity.app/Contents/PlaybackEngines'
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  api=14 insize=1675 outsize=7552 ok=1
+Cmd: translateComputeKernel
+  api=14 insize=16695 outsize=25662 ok=1
