@@ -152,12 +152,12 @@ public class PlayerMove : MonoBehaviour
     {
         return new Vector4(m1.m03 * v1.w, m1.m13 * v1.w, m1.m23 * v1.w, 0);
     }
-    public float lip(Vector4 v1, Vector4 v2) //Lorentzian inner product
+    private float lip(Vector4 v1, Vector4 v2) //Lorentzian inner product
     {
         return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z - v1.w * v2.w;
     }
 
-    public float lSqN(Vector4 v) //Lorentzian squared norm
+    private float lSqN(Vector4 v) //Lorentzian squared norm
     {
         return v.x * v.x + v.y * v.y + v.z * v.z - v.w * v.w;
     }

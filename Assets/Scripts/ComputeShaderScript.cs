@@ -139,7 +139,7 @@ public class ComputeShaderScript : MonoBehaviour {
         {
             //Electromagnetic Tensor Component for particles
             Vector4 positionP = particles[i].position;
-            positionP.w = 
+            positionP.w +=  
             Matrix4x4 F = GaugeField(particles[i].position);
             particles[i] = new ParticleData
             {
@@ -314,5 +314,20 @@ public class ComputeShaderScript : MonoBehaviour {
         K.m33 = 0;
 
         return K;
+    }
+    private float lip(Vector4 v1, Vector4 v2) //Lorentzian inner product
+    {
+        return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z - v1.w * v2.w;
+    }
+
+    private float lSqN(Vector4 v) //Lorentzian squared norm
+    {
+        return v.x * v.x + v.y * v.y + v.z * v.z - v.w * v.w;
+    }
+
+    private float dtau(Vector4 Xp, Vector4 Xn, Vector4 Vp, Vector4 Vn)
+    {
+        float dtau = lip(Vn, Xn - Xp) - Mathf.Sqrt(lip(Vn, Xn - Xp) * lip(Vn, Xn - Xp) - Time.deltaTime * (lip(2 * Xn - 2 * Xp - Time.deltaTime * Vp, Vp)));
+        return dtau;
     }
 }
