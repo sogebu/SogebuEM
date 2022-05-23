@@ -36,6 +36,8 @@ public class ComputeShaderScript : MonoBehaviour {
 
     #endregion
 
+    private Vector4[] particlePosition;
+
     #region ComputeShader & Buffer
     public ComputeShader _cs;
     // Direction格納したバッファ
@@ -130,6 +132,26 @@ public class ComputeShaderScript : MonoBehaviour {
         Debug.Log($"VectorFieldKernelDataIndex = {VectorFieldKernel}");
         cs.Dispatch(VectorFieldKernel, GetGridNum()/X_THREAD, 1, 1);
 
+        /*
+         //Equation of Motion of Charged Particles
+        ParticleData[] particles = new ParticleData[_ParticleCount];
+        for (int i = 0; i < _ParticleCount; i++)
+        {
+            //Electromagnetic Tensor Component for particles
+            Vector4 positionP = particles[i].position;
+            positionP.w = 
+            Matrix4x4 F = GaugeField(particles[i].position);
+            particles[i] = new ParticleData
+            {
+                velocity = new Vector3(0.0f, 0.0f, 0.0f),
+                position = Random.onUnitSphere * 1.1f,//position
+            };
+        }
+        // keep the size of ParticleData.
+        _ParticleDataBuffer = new ComputeBuffer(_ParticleCount, Marshal.SizeOf(typeof(ParticleData)));
+        _ParticleDataBuffer.SetData(particles);
+         */
+
         Debug.Log($"FindKernel_Particle = {cs.FindKernel("ParticleMain")}");
         int ParticleKernel = cs.FindKernel("ParticleMain");
         cs.SetBuffer(ParticleKernel, "_EVectorFieldDataBuffer", _EVectorFieldDataBuffer);
@@ -140,7 +162,7 @@ public class ComputeShaderScript : MonoBehaviour {
         Debug.Log($"_ParticleCount/X_THREAD = {_ParticleCount / X_THREAD}");
         //ここが問題
         //Debug.Log($"cs.Dispatch(ParticleKernel, _ParticleCount / X_THREAD, 1, 1) = {cs.Dispatch(1, 1, 1, 1)}");
-        //cs.Dispatch(1, 1, 1, 1);
+        cs.Dispatch(ParticleKernel, _ParticleCount / X_THREAD, 1, 1);
     }
 
     /// <summary>
@@ -181,6 +203,7 @@ public class ComputeShaderScript : MonoBehaviour {
     /// </summary>
 	/// //ToDo initialization of 4 vector 
     void InitializeParticleComputeBuffer() {
+        particlePosition = new Vector4[_ParticleCount];
         ParticleData[] particles = new ParticleData[_ParticleCount];
         //particle generation
         for (int i = 0; i < _ParticleCount; i++) {
@@ -190,6 +213,8 @@ public class ComputeShaderScript : MonoBehaviour {
                 color = _ParticleColor,
                 scale = 0.02f,
             };
+            particlePosition[i] = particles[i].position;
+            particlePosition[i].w = 0.0f;
         }
         // keep the size of ParticleData.
         _ParticleDataBuffer = new ComputeBuffer(_ParticleCount, Marshal.SizeOf(typeof(ParticleData)));
@@ -228,6 +253,64 @@ public class ComputeShaderScript : MonoBehaviour {
         K.m30 = -v1.x;
         K.m31 = -v1.y;
         K.m32 = -v1.z;
+        K.m33 = 0;
+
+        return K;
+    }
+
+    public Vector4 A(float x, float y, float z, float t)
+    {
+        float r = (new Vector3(x, y, z)).magnitude;
+        return new Vector4(0, 0, 0, 1 / r);
+    }
+
+    public Matrix4x4 dA(Vector4 p)
+    {
+        Matrix4x4 D = Matrix4x4.identity;
+        D.m00 = (A(p.x + 1e-6f, p.y, p.z, p.w).x - A(p.x - 1e-6f, p.y, p.z, p.w).x) / (2e-6f);
+        D.m01 = (A(p.x, p.y + 1e-6f, p.z, p.w).x - A(p.x, p.y - 1e-6f, p.z, p.w).x) / (2e-6f);
+        D.m02 = (A(p.x, p.y, p.z + 1e-6f, p.w).x - A(p.x, p.y, p.z - 1e-6f, p.w).x) / (2e-6f);
+        D.m03 = (A(p.x, p.y, p.z, p.w + 1e-6f).x - A(p.x, p.y, p.z, p.w - 1e-6f).x) / (2e-6f);
+
+        D.m10 = (A(p.x + 1e-6f, p.y, p.z, p.w).y - A(p.x - 1e-6f, p.y, p.z, p.w).y) / (2e-6f);
+        D.m11 = (A(p.x, p.y + 1e-6f, p.z, p.w).y - A(p.x, p.y - 1e-6f, p.z, p.w).y) / (2e-6f);
+        D.m12 = (A(p.x, p.y, p.z + 1e-6f, p.w).y - A(p.x, p.y, p.z - 1e-6f, p.w).y) / (2e-6f);
+        D.m13 = (A(p.x, p.y, p.z, p.w + 1e-6f).y - A(p.x, p.y, p.z, p.w - 1e-6f).y) / (2e-6f);
+
+        D.m20 = (A(p.x + 1e-6f, p.y, p.z, p.w).z - A(p.x - 1e-6f, p.y, p.z, p.w).z) / (2e-6f);
+        D.m21 = (A(p.x, p.y + 1e-6f, p.z, p.w).z - A(p.x, p.y - 1e-6f, p.z, p.w).z) / (2e-6f);
+        D.m22 = (A(p.x, p.y, p.z + 1e-6f, p.w).z - A(p.x, p.y, p.z - 1e-6f, p.w).z) / (2e-6f);
+        D.m23 = (A(p.x, p.y, p.z, p.w + 1e-6f).z - A(p.x, p.y, p.z, p.w - 1e-6f).z) / (2e-6f);
+
+        D.m30 = (A(p.x + 1e-6f, p.y, p.z, p.w).w - A(p.x - 1e-6f, p.y, p.z, p.w).w) / (2e-6f);
+        D.m31 = (A(p.x, p.y + 1e-6f, p.z, p.w).w - A(p.x, p.y - 1e-6f, p.z, p.w).w) / (2e-6f);
+        D.m32 = (A(p.x, p.y, p.z + 1e-6f, p.w).w - A(p.x, p.y, p.z - 1e-6f, p.w).w) / (2e-6f);
+        D.m33 = (A(p.x, p.y, p.z, p.w + 1e-6f).w - A(p.x, p.y, p.z, p.w - 1e-6f).w) / (2e-6f);
+
+        return D;
+    }
+
+    public Matrix4x4 GaugeField(Vector4 x)
+    {
+        Matrix4x4 K = Matrix4x4.identity;
+
+        K.m00 = 0;
+        K.m03 = dA(x).m03 - dA(x).m30;
+        K.m13 = dA(x).m13 - dA(x).m31;
+        K.m23 = dA(x).m23 - dA(x).m32;
+
+        K.m10 = dA(x).m10 - dA(x).m01;
+        K.m11 = 0;
+        K.m01 = dA(x).m01 - dA(x).m10;
+        K.m02 = dA(x).m02 - dA(x).m20;
+        K.m20 = dA(x).m20 - dA(x).m02;
+        K.m12 = dA(x).m12 - dA(x).m21;
+        K.m22 = 0;
+        K.m21 = dA(x).m21 - dA(x).m12;
+
+        K.m30 = dA(x).m30 - dA(x).m03;
+        K.m31 = dA(x).m31 - dA(x).m13;
+        K.m32 = dA(x).m32 - dA(x).m23;
         K.m33 = 0;
 
         return K;

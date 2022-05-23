@@ -71,7 +71,7 @@ void ParticleMain (uint3 id : SV_DispatchThreadID)
 {
     int index = id.x;
     Particle p = _ParticleDataBuffer[index];
-
+    /*
     for (int i = 0; i < NUM_THREAD_X; i++) {
         //関数にしよう。粒子の速度と位置のみで決まる    
         VectorField Evf = _EVectorFieldDataBuffer[i];
@@ -96,6 +96,6 @@ void ParticleMain (uint3 id : SV_DispatchThreadID)
         ParticlePositionWorld4 = mul(Lplayer, ParticlePositionWorld4);
         p.position = ParticlePositionWorld4.xyz;
     }
-
+    */
     _ParticleDataBuffer[index] = p;
 }
