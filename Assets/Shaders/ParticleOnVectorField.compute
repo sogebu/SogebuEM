@@ -56,12 +56,13 @@ void VectorFieldMain (
     //float fc = _FrameCount * 0.04;
     //Evf.direction = Pnoise(noiseSeed * fc);
     //Evf.dirScalar = sqrt(dot(Evf.direction, Evf.direction));
-    float4 latticeposworld;
+    /*float4 latticeposworld;
     latticeposworld.xyz = Evf.position;
     float3 latticeplayerdir = playrposworldframe4.xyz - Evf.position;
     latticeposworld.w = -sqrt(dot(latticeplayerdir, latticeplayerdir));
     latticeposworld = mul(Lplayer, latticeposworld);
     Evf.position = latticeposworld.xyz;
+    */
     _EVectorFieldDataBuffer[bufferIndex] = Evf;
     //_BVectorFieldDataBuffer[bufferIndex] = Evf;
 }

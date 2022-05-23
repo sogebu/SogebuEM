@@ -37,6 +37,8 @@ public class ComputeShaderScript : MonoBehaviour {
     #endregion
 
     private Vector4[] particlePosition;
+    private Vector4[] particleVelocity;
+    private Vector4[] latticePosition;
 
     #region ComputeShader & Buffer
     public ComputeShader _cs;
@@ -88,6 +90,9 @@ public class ComputeShaderScript : MonoBehaviour {
     }
     #endregion
 
+    Camera player;
+    PlayerMove PlayerMove;
+
     /// <summary>
     /// 破棄
     /// </summary>
@@ -111,6 +116,8 @@ public class ComputeShaderScript : MonoBehaviour {
     /// 初期化
     /// </summary>
     void Start() {
+        player = Camera.main;
+        PlayerMove = player.GetComponent<PlayerMove>();
         InitializeVectorFieldComputeBuffer();
         InitializeParticleComputeBuffer();
         Shader.SetGlobalVector("ParticlePositionWorld4", new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -123,43 +130,51 @@ public class ComputeShaderScript : MonoBehaviour {
     void Update() {
         //Debug.Log($"ShaderGetVector = {material.GetVector("ParticlePositionWorld4")}");
         ComputeShader cs = _cs;
-        Debug.Log($"FindKernel_VF = {cs.FindKernel("VectorFieldMain")}");
+        //Debug.Log($"FindKernel_VF = {cs.FindKernel("VectorFieldMain")}");
         int VectorFieldKernel = cs.FindKernel("VectorFieldMain");
         cs.SetBuffer(VectorFieldKernel, "_EVectorFieldDataBuffer", _EVectorFieldDataBuffer);
         //cs.SetBuffer(VectorFieldKernel, "_BVectorFieldDataBuffer", _BVectorFieldDataBuffer);
         cs.SetFloat("_DeltaTime", Time.deltaTime);
         cs.SetFloat("_FrameCount", Time.frameCount);
-        Debug.Log($"VectorFieldKernelDataIndex = {VectorFieldKernel}");
+        //Debug.Log($"VectorFieldKernelDataIndex = {VectorFieldKernel}");
         cs.Dispatch(VectorFieldKernel, GetGridNum()/X_THREAD, 1, 1);
 
-        /*
-         //Equation of Motion of Charged Particles
+        
+        //Equation of Motion of Charged Particles
         ParticleData[] particles = new ParticleData[_ParticleCount];
         for (int i = 0; i < _ParticleCount; i++)
         {
             //Electromagnetic Tensor Component for particles
-            Vector4 positionP = particles[i].position;
-            positionP.w +=  
-            Matrix4x4 F = GaugeField(particles[i].position);
+            particlePosition[i].w += dtau(PlayerMove.playrposworldframe4, particlePosition[i], PlayerMove.playrvelworldframe4, particleVelocity[i]);
+            Matrix4x4 F = GaugeField(particlePosition[i]);
+
+            particleVelocity[i] += new Vector4(F.m03, F.m13, F.m23, 0.0f) * dtau(PlayerMove.playrposworldframe4, particlePosition[i], PlayerMove.playrvelworldframe4, particleVelocity[i]);
+            particlePosition[i] += particleVelocity[i] * dtau(PlayerMove.playrposworldframe4, particlePosition[i], PlayerMove.playrvelworldframe4, particleVelocity[i]);//position
+            Debug.Log($"{particleVelocity[i]}, {particlePosition[i]}");
             particles[i] = new ParticleData
             {
-                velocity = new Vector3(0.0f, 0.0f, 0.0f),
-                position = Random.onUnitSphere * 1.1f,//position
+                velocity = new Vector3(particleVelocity[i].x, particleVelocity[i].y, particleVelocity[i].z),
+                position = new Vector3(particlePosition[i].x, particlePosition[i].y, particlePosition[i].z),//position
+                color = _ParticleColor,
+                scale = 0.02f,
             };
         }
         // keep the size of ParticleData.
+        if (_ParticleDataBuffer != null)
+        {
+            _ParticleDataBuffer.Release();
+            _ParticleDataBuffer = null;
+        }
         _ParticleDataBuffer = new ComputeBuffer(_ParticleCount, Marshal.SizeOf(typeof(ParticleData)));
         _ParticleDataBuffer.SetData(particles);
-         */
 
-        Debug.Log($"FindKernel_Particle = {cs.FindKernel("ParticleMain")}");
         int ParticleKernel = cs.FindKernel("ParticleMain");
         cs.SetBuffer(ParticleKernel, "_EVectorFieldDataBuffer", _EVectorFieldDataBuffer);
         //cs.SetBuffer(ParticleKernel, "_BVectorFieldDataBuffer", _BVectorFieldDataBuffer);
         cs.SetBuffer(ParticleKernel, "_ParticleDataBuffer", _ParticleDataBuffer);
         cs.SetFloat("_DeltaTime", Time.deltaTime);
-        Debug.Log($"ParticleKernelDataIndex = {ParticleKernel}");
-        Debug.Log($"_ParticleCount/X_THREAD = {_ParticleCount / X_THREAD}");
+        //Debug.Log($"ParticleKernelDataIndex = {ParticleKernel}");
+        //Debug.Log($"_ParticleCount/X_THREAD = {_ParticleCount / X_THREAD}");
         //ここが問題
         //Debug.Log($"cs.Dispatch(ParticleKernel, _ParticleCount / X_THREAD, 1, 1) = {cs.Dispatch(1, 1, 1, 1)}");
         cs.Dispatch(ParticleKernel, _ParticleCount / X_THREAD, 1, 1);
@@ -169,6 +184,7 @@ public class ComputeShaderScript : MonoBehaviour {
     /// Vectorfield computebuffer Initialisation
     /// </summary>
     void InitializeVectorFieldComputeBuffer() {
+        latticePosition = new Vector4[X_GRID * Y_GRID * Z_GRID];
         Vector3[] Position = new Vector3[X_GRID * Y_GRID * Z_GRID];
         Vector3[] DirVector = new Vector3[X_GRID * Y_GRID * Z_GRID];
         float[] DirScalar = new float[X_GRID * Y_GRID * Z_GRID];
@@ -178,10 +194,13 @@ public class ComputeShaderScript : MonoBehaviour {
                     int i = z * (Y_GRID * X_GRID) + y * (X_GRID) + x;
                     //generate position
                     Position[i] = new Vector3(x - (float)(X_GRID-1)/2, y - (float)(Y_GRID-1)/2, z - (float)(Z_GRID-1)/2);
+                    latticePosition[i] = Position[i];
+                    latticePosition[i].w = - (Position[i] - PlayerMove.playrposworldframe3).magnitude;
+                    Matrix4x4 emTensor = GaugeField(latticePosition[i]);
                     //vector field non-normalised direction at each generating position
-                    DirVector[i] = new Vector3(Position[i].x, Position[i].y, Position[i].z);
+                    DirVector[i] = new Vector3(emTensor.m03, emTensor.m13, emTensor.m23);
                     //vector magnitude Coulomb Field
-                    DirScalar[i] = 1.0f / Mathf.Pow(DirVector[i].magnitude, 2.0f);
+                    DirScalar[i] = DirVector[i].magnitude;
                 }
             }
         }
@@ -204,6 +223,7 @@ public class ComputeShaderScript : MonoBehaviour {
 	/// //ToDo initialization of 4 vector 
     void InitializeParticleComputeBuffer() {
         particlePosition = new Vector4[_ParticleCount];
+        particleVelocity = new Vector4[_ParticleCount];
         ParticleData[] particles = new ParticleData[_ParticleCount];
         //particle generation
         for (int i = 0; i < _ParticleCount; i++) {
@@ -214,7 +234,10 @@ public class ComputeShaderScript : MonoBehaviour {
                 scale = 0.02f,
             };
             particlePosition[i] = particles[i].position;
-            particlePosition[i].w = 0.0f;
+            particlePosition[i].w = -(particles[i].position - PlayerMove.playrposworldframe3).magnitude;
+            Debug.Log($"{particles[i].velocity}, {particles[i].position}");
+            particleVelocity[i] = particles[i].velocity;
+            particleVelocity[i].w = Mathf.Sqrt(1 + particles[i].velocity.magnitude * particles[i].velocity.magnitude);
         }
         // keep the size of ParticleData.
         _ParticleDataBuffer = new ComputeBuffer(_ParticleCount, Marshal.SizeOf(typeof(ParticleData)));
@@ -261,7 +284,7 @@ public class ComputeShaderScript : MonoBehaviour {
     public Vector4 A(float x, float y, float z, float t)
     {
         float r = (new Vector3(x, y, z)).magnitude;
-        return new Vector4(0, 0, 0, 1 / r);
+        return new Vector4(0, 0, 0, 0.01f / r);
     }
 
     public Matrix4x4 dA(Vector4 p)
@@ -327,7 +350,8 @@ public class ComputeShaderScript : MonoBehaviour {
 
     private float dtau(Vector4 Xp, Vector4 Xn, Vector4 Vp, Vector4 Vn)
     {
-        float dtau = lip(Vn, Xn - Xp) - Mathf.Sqrt(lip(Vn, Xn - Xp) * lip(Vn, Xn - Xp) - Time.deltaTime * (lip(2 * Xn - 2 * Xp - Time.deltaTime * Vp, Vp)));
+        float cp = lip(Vp, Vp) * Time.deltaTime * Time.deltaTime + 2 * lip(Vp, Xp - Xn) * Time.deltaTime;
+        float dtau = lip(Vn, Xn - Xp - Vp * Time.deltaTime) - Mathf.Sqrt(lip(Vn, Xn - Xp - Vp * Time.deltaTime) * lip(Vn, Xn - Xp - Vp * Time.deltaTime) - cp * lip(Vn, Vn));
         return dtau;
     }
 }
