@@ -10,6 +10,7 @@ public class ComputeShaderScript : MonoBehaviour {
         public Vector3 position;
         public Vector3 direction;
         public float dirScalar;
+        public Matrix4x4 ftensor;
     }
 
     struct ParticleData {
@@ -214,6 +215,7 @@ public class ComputeShaderScript : MonoBehaviour {
             VFData[i].position = Position[i];
             VFData[i].direction = DirVector[i].normalized;
             VFData[i].dirScalar = Mathf.Log10(DirScalar[i]);
+            VFData[i].ftensor = GaugeField(latticePosition[i]);
         }
         _EVectorFieldDataBuffer.SetData(VFData);
 
@@ -247,6 +249,7 @@ public class ComputeShaderScript : MonoBehaviour {
             VFData2[i].position = Position[i];
             VFData2[i].direction = DirVector[i].normalized;
             VFData2[i].dirScalar = Mathf.Log10(DirScalar[i]);
+            VFData2[i].ftensor = GaugeField(latticePosition[i]);
         }
         _BVectorFieldDataBuffer.SetData(VFData2);
     }

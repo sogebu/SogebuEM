@@ -134,6 +134,7 @@ public class PlayerMove : MonoBehaviour
         playrposworldframe3 = playrposworldframe4;
 
         this.transform.position = Lplayer * playrposworldframe4;
+        Shader.SetGlobalMatrix("Lplayer", Lplayer);
         Shader.SetGlobalVector("playrposworldframe4", playrposworldframe4);
         Shader.SetGlobalVector("playrvelworldframe4", playrvelworldframe4);
     }

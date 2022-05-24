@@ -29,6 +29,7 @@
 			float3 position;
 			float3 direction;
 			float dirScalar;
+			float4x4 ftensor;
 		};
 
 		#ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED

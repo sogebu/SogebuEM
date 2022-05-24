@@ -14,6 +14,7 @@ struct VectorField {
     float3 position;
     float3 direction;
     float dirScalar;
+    float4x4 ftensor;
 };
 
 struct Particle {
@@ -64,6 +65,11 @@ void VectorFieldMain (
     //latticeposworld.w = -sqrt(dot(latticeplayerdir, latticeplayerdir));
     //latticeposworld = mul(Lplayer, latticeposworld);
     //Evf.position = latticeposworld.xyz;
+    float4x4 F = mul(mul(Lplayer, Evf.ftensor), Lplayer);
+    Evf.direction = normalize(float3(F[0][3], F[1][3], F[2][3]));
+    Evf.dirScalar = length(float3(F[0][3], F[1][3], F[2][3]));
+    Bvf.direction = normalize(float3(F[1][2], F[2][0], F[0][1]));
+    Bvf.dirScalar = length(float3(F[1][2], F[2][0], F[0][1]));
     _EVectorFieldDataBuffer[bufferIndex] = Evf;
     _BVectorFieldDataBuffer[bufferIndex] = Bvf;
 }
