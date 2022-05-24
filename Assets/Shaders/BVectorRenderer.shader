@@ -35,7 +35,7 @@ Shader "myShader/BVectorRenderer"
 		// データの構造体バッファ
 		StructuredBuffer<VectorData> _BVectorFieldDataBuffer;
 		#endif
-		float3 _ObjectScale;
+		float3 _BObjectScale;
 
 		sampler2D _MainTex; // テクスチャ
 
@@ -135,7 +135,7 @@ Shader "myShader/BVectorRenderer"
 			VectorData VFData = _BVectorFieldDataBuffer[unity_InstanceID];
 
 			float3 pos = VFData.position.xyz; // 位置を取得
-			float3 scl = _ObjectScale;          // スケールを取得
+			float3 scl = _BObjectScale;          // スケールを取得
 
 
 			// オブジェクト座標からワールド座標に変換する行列を定義

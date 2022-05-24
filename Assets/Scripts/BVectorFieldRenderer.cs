@@ -7,7 +7,7 @@ public class BVectorFieldRenderer : MonoBehaviour
 {
     #region Paremeters
     // 描画するオブジェクトのスケール
-    public Vector3 ObjectScale = new Vector3(0.2f, 1.5f, 0.2f);
+    public Vector3 BObjectScale = new Vector3(0.2f, 1.5f, 0.2f);
     #endregion
 
     #region Script References
@@ -75,11 +75,11 @@ public class BVectorFieldRenderer : MonoBehaviour
         argsBuffer.SetData(args); // バッファにセット
 
         // VectorFieldデータを格納したバッファをマテリアルにセット
-        /*InstanceRenderMaterial.SetBuffer("_BVectorFieldDataBuffer",
+        InstanceRenderMaterial.SetBuffer("_BVectorFieldDataBuffer",
             csScript.GetBVectorFieldDataBuffer());
-        */
+
         // vectorFieldオブジェクトスケールをセット
-        InstanceRenderMaterial.SetVector("_ObjectScale", ObjectScale);
+        InstanceRenderMaterial.SetVector("_BObjectScale", BObjectScale);
         // 境界領域を定義
         var bounds = new Bounds
         (

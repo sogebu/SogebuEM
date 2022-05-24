@@ -44,7 +44,7 @@ public class ComputeShaderScript : MonoBehaviour {
     public ComputeShader _cs;
     // Direction格納したバッファ
     public ComputeBuffer _EVectorFieldDataBuffer;
-    //public ComputeBuffer _BVectorFieldDataBuffer;
+    public ComputeBuffer _BVectorFieldDataBuffer;
     public ComputeBuffer _ParticleDataBuffer;
     #endregion
 
@@ -66,10 +66,10 @@ public class ComputeShaderScript : MonoBehaviour {
     {
         return this._EVectorFieldDataBuffer != null ? this._EVectorFieldDataBuffer : null;
     }
-    /*public ComputeBuffer GetBVectorFieldDataBuffer()
+    public ComputeBuffer GetBVectorFieldDataBuffer()
     {
         return this._BVectorFieldDataBuffer != null ? this._BVectorFieldDataBuffer : null;
-    }*/
+    }
     public ComputeBuffer GetParticleDataBuffer() {
         return this._ParticleDataBuffer != null ? this._ParticleDataBuffer : null;
     }
@@ -101,11 +101,11 @@ public class ComputeShaderScript : MonoBehaviour {
             _EVectorFieldDataBuffer.Release();
             _EVectorFieldDataBuffer = null;
         }
-        /*if (_BVectorFieldDataBuffer != null)
+        if (_BVectorFieldDataBuffer != null)
         {
             _BVectorFieldDataBuffer.Release();
             _BVectorFieldDataBuffer = null;
-        }*/
+        }
         if (_ParticleDataBuffer != null) {
             _ParticleDataBuffer.Release();
             _ParticleDataBuffer = null;
@@ -133,7 +133,7 @@ public class ComputeShaderScript : MonoBehaviour {
         //Debug.Log($"FindKernel_VF = {cs.FindKernel("VectorFieldMain")}");
         int VectorFieldKernel = cs.FindKernel("VectorFieldMain");
         cs.SetBuffer(VectorFieldKernel, "_EVectorFieldDataBuffer", _EVectorFieldDataBuffer);
-        //cs.SetBuffer(VectorFieldKernel, "_BVectorFieldDataBuffer", _BVectorFieldDataBuffer);
+        cs.SetBuffer(VectorFieldKernel, "_BVectorFieldDataBuffer", _BVectorFieldDataBuffer);
         cs.SetFloat("_DeltaTime", Time.deltaTime);
         cs.SetFloat("_FrameCount", Time.frameCount);
         //Debug.Log($"VectorFieldKernelDataIndex = {VectorFieldKernel}");
@@ -148,9 +148,9 @@ public class ComputeShaderScript : MonoBehaviour {
             particlePosition[i].w += dtau(PlayerMove.playrposworldframe4, particlePosition[i], PlayerMove.playrvelworldframe4, particleVelocity[i]);
             Matrix4x4 F = GaugeField(particlePosition[i]);
 
-            particleVelocity[i] += new Vector4(F.m03, F.m13, F.m23, 0.0f) * dtau(PlayerMove.playrposworldframe4, particlePosition[i], PlayerMove.playrvelworldframe4, particleVelocity[i]);
+            particleVelocity[i] += 1e-2f * new Vector4(F.m03, F.m13, F.m23, 0.0f) * dtau(PlayerMove.playrposworldframe4, particlePosition[i], PlayerMove.playrvelworldframe4, particleVelocity[i]);
             particlePosition[i] += particleVelocity[i] * dtau(PlayerMove.playrposworldframe4, particlePosition[i], PlayerMove.playrvelworldframe4, particleVelocity[i]);//position
-            Debug.Log($"{particleVelocity[i]}, {particlePosition[i]}");
+            //Debug.Log($"{particleVelocity[i]}, {particlePosition[i]}");
             particles[i] = new ParticleData
             {
                 velocity = new Vector3(particleVelocity[i].x, particleVelocity[i].y, particleVelocity[i].z),
@@ -170,7 +170,7 @@ public class ComputeShaderScript : MonoBehaviour {
 
         int ParticleKernel = cs.FindKernel("ParticleMain");
         cs.SetBuffer(ParticleKernel, "_EVectorFieldDataBuffer", _EVectorFieldDataBuffer);
-        //cs.SetBuffer(ParticleKernel, "_BVectorFieldDataBuffer", _BVectorFieldDataBuffer);
+        cs.SetBuffer(ParticleKernel, "_BVectorFieldDataBuffer", _BVectorFieldDataBuffer);
         cs.SetBuffer(ParticleKernel, "_ParticleDataBuffer", _ParticleDataBuffer);
         cs.SetFloat("_DeltaTime", Time.deltaTime);
         //Debug.Log($"ParticleKernelDataIndex = {ParticleKernel}");
@@ -209,12 +209,46 @@ public class ComputeShaderScript : MonoBehaviour {
 
         // keep VectorFieldData Array.
         VectorFieldData[] VFData = new VectorFieldData[_EVectorFieldDataBuffer.count];
-        for (int i = 0; i < _EVectorFieldDataBuffer.count; i++) {
+        for (int i = 0; i < _EVectorFieldDataBuffer.count; i++)
+        {
             VFData[i].position = Position[i];
             VFData[i].direction = DirVector[i].normalized;
-            VFData[i].dirScalar = DirScalar[i];
+            VFData[i].dirScalar = Mathf.Log10(DirScalar[i]);
         }
         _EVectorFieldDataBuffer.SetData(VFData);
+
+        for (int z = 0; z < Z_GRID; z++)
+        {
+            for (int y = 0; y < Y_GRID; y++)
+            {
+                for (int x = 0; x < X_GRID; x++)
+                {
+                    int i = z * (Y_GRID * X_GRID) + y * (X_GRID) + x;
+                    //generate position
+                    Position[i] = new Vector3(x - (float)(X_GRID - 1) / 2, y - (float)(Y_GRID - 1) / 2, z - (float)(Z_GRID - 1) / 2);
+                    latticePosition[i] = Position[i];
+                    latticePosition[i].w = -(Position[i] - PlayerMove.playrposworldframe3).magnitude;
+                    Matrix4x4 emTensor = GaugeField(latticePosition[i]);
+                    //vector field non-normalised direction at each generating position
+                    DirVector[i] = new Vector3(emTensor.m12, emTensor.m20, emTensor.m01);
+                    Debug.Log($"{DirVector[i]}");
+                    //vector magnitude Coulomb Field
+                    DirScalar[i] = DirVector[i].magnitude;
+                }
+            }
+        }
+
+        // keep the size of VectorFieldData.
+        _BVectorFieldDataBuffer = new ComputeBuffer(GetGridNum(), Marshal.SizeOf(typeof(VectorFieldData)));
+
+        // keep VectorFieldData Array.
+        VectorFieldData[] VFData2 = new VectorFieldData[_BVectorFieldDataBuffer.count];
+        for (int i = 0; i < _BVectorFieldDataBuffer.count; i++) {
+            VFData2[i].position = Position[i];
+            VFData2[i].direction = DirVector[i].normalized;
+            VFData2[i].dirScalar = Mathf.Log10(DirScalar[i]);
+        }
+        _BVectorFieldDataBuffer.SetData(VFData2);
     }
 
     /// <summary>
@@ -235,7 +269,7 @@ public class ComputeShaderScript : MonoBehaviour {
             };
             particlePosition[i] = particles[i].position;
             particlePosition[i].w = -(particles[i].position - PlayerMove.playrposworldframe3).magnitude;
-            Debug.Log($"{particles[i].velocity}, {particles[i].position}");
+            //Debug.Log($"{particles[i].velocity}, {particles[i].position}");
             particleVelocity[i] = particles[i].velocity;
             particleVelocity[i].w = Mathf.Sqrt(1 + particles[i].velocity.magnitude * particles[i].velocity.magnitude);
         }
@@ -284,7 +318,7 @@ public class ComputeShaderScript : MonoBehaviour {
     public Vector4 A(float x, float y, float z, float t)
     {
         float r = (new Vector3(x, y, z)).magnitude;
-        return new Vector4(0, 0, 0, 0.01f / r);
+        return new Vector4(0, 0, 0, 10f / r);
     }
 
     public Matrix4x4 dA(Vector4 p)

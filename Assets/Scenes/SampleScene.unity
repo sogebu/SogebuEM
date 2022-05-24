@@ -413,6 +413,7 @@ GameObject:
   - component: {fileID: 1510263236}
   - component: {fileID: 1510263238}
   - component: {fileID: 1510263237}
+  - component: {fileID: 1510263239}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -491,4 +492,21 @@ MonoBehaviour:
   csScript: {fileID: 1510263236}
   InstanceMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   InstanceRenderMaterial: {fileID: 2100000, guid: 9f7fd3091e8a14f2481c30b9f2ee5979,
+    type: 2}
+--- !u!114 &1510263239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1510263234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e273c8a33df144a4919c371a2eb8b48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObjectScale: {x: 0.2, y: 1.5, z: 0.2}
+  csScript: {fileID: 1510263236}
+  InstanceMesh: {fileID: 4300000, guid: 33b0feee67c1f4ce29760a80d5b7974c, type: 2}
+  InstanceRenderMaterial: {fileID: 2100000, guid: 4dfc2cfc85f194e0abbcb3bce7506677,
     type: 2}

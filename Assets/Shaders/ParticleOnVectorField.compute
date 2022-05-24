@@ -24,7 +24,7 @@ struct Particle {
 };
 
 RWStructuredBuffer<VectorField> _EVectorFieldDataBuffer;
-//RWStructuredBuffer<VectorField> _BVectorFieldDataBuffer;
+RWStructuredBuffer<VectorField> _BVectorFieldDataBuffer;
 RWStructuredBuffer<Particle> _ParticleDataBuffer;
 
 float _DeltaTime;
@@ -34,6 +34,8 @@ float4x4 Lplayer;
 float4x4 R;
 float4 playrposworldframe4;
 float4 playrvelworldframe4;
+float4 ParticlePositionWorld4[10000];
+float4 ParticleVelocityWorld4[10000];
 
 float LorentzInnerProduct(float4 u1, float4 u2)
 {
@@ -50,21 +52,20 @@ void VectorFieldMain (
 {
     uint bufferIndex = id.x;
     VectorField Evf = _EVectorFieldDataBuffer[bufferIndex];
-    //VectorField Bvf = _BVectorFieldDataBuffer[bufferIndex];
+    VectorField Bvf = _BVectorFieldDataBuffer[bufferIndex];
 
     //float3 noiseSeed = Evf.position * 0.05;
     //float fc = _FrameCount * 0.04;
     //Evf.direction = Pnoise(noiseSeed * fc);
     //Evf.dirScalar = sqrt(dot(Evf.direction, Evf.direction));
-    /*float4 latticeposworld;
-    latticeposworld.xyz = Evf.position;
-    float3 latticeplayerdir = playrposworldframe4.xyz - Evf.position;
-    latticeposworld.w = -sqrt(dot(latticeplayerdir, latticeplayerdir));
-    latticeposworld = mul(Lplayer, latticeposworld);
-    Evf.position = latticeposworld.xyz;
-    */
+    //float4 latticeposworld;
+    //latticeposworld.xyz = Evf.position;
+    //float3 latticeplayerdir = playrposworldframe4.xyz - Evf.position;
+    //latticeposworld.w = -sqrt(dot(latticeplayerdir, latticeplayerdir));
+    //latticeposworld = mul(Lplayer, latticeposworld);
+    //Evf.position = latticeposworld.xyz;
     _EVectorFieldDataBuffer[bufferIndex] = Evf;
-    //_BVectorFieldDataBuffer[bufferIndex] = Evf;
+    _BVectorFieldDataBuffer[bufferIndex] = Bvf;
 }
 
 [numthreads(NUM_THREAD_X,1,1)]
@@ -74,14 +75,9 @@ void ParticleMain (uint3 id : SV_DispatchThreadID)
     Particle p = _ParticleDataBuffer[index];
     /*
     for (int i = 0; i < NUM_THREAD_X; i++) {
-        //関数にしよう。粒子の速度と位置のみで決まる    
-        VectorField Evf = _EVectorFieldDataBuffer[i];
-        //VectorField Bvf = _BVectorFieldDataBuffer[i];
-        float3 dir = p.position - Evf.position;
-        float dist = sqrt(dot(dir, dir));
+        //関数にしよう。粒子の速度と位置のみで決まる
         float4 ParticlePositionWorld4;
         float4 ParticleVelocityWorld4;
-
         ParticlePositionWorld4.xyz = p.position;
         ParticlePositionWorld4.w = 0;//-sqrt(dot(p.position - playrposworldframe4.xyz, p.position - playrposworldframe4.xyz)) 
         ParticleVelocityWorld4.xyz = p.velocity;
