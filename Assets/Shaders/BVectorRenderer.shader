@@ -30,6 +30,7 @@ Shader "myShader/BVectorRenderer"
 			float3 direction;
 			float dirScalar;
 			float4x4 ftensor;
+			float4 latticeposition;
 		};
 
 		#ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED

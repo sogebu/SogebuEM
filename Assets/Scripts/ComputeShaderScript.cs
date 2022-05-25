@@ -11,6 +11,7 @@ public class ComputeShaderScript : MonoBehaviour {
         public Vector3 direction;
         public float dirScalar;
         public Matrix4x4 ftensor;
+        public Vector4 latticeposition;
     }
 
     struct ParticleData {
@@ -18,6 +19,8 @@ public class ComputeShaderScript : MonoBehaviour {
         public Vector3 position;
         public Vector4 color;
         public float scale;
+        public Vector4 ParticlePositionWorld4;
+        public Vector4 ParticleVelocityWorld4;
     }
 
     #region Grid
@@ -121,7 +124,7 @@ public class ComputeShaderScript : MonoBehaviour {
         PlayerMove = player.GetComponent<PlayerMove>();
         InitializeVectorFieldComputeBuffer();
         InitializeParticleComputeBuffer();
-        Shader.SetGlobalVector("ParticlePositionWorld4", new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
+        //Shader.SetGlobalVector("ParticlePositionWorld4", new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
         //Shader.SetGlobalVector("ParticlePositionWorld4", new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
     }
 
@@ -140,7 +143,7 @@ public class ComputeShaderScript : MonoBehaviour {
         //Debug.Log($"VectorFieldKernelDataIndex = {VectorFieldKernel}");
         cs.Dispatch(VectorFieldKernel, GetGridNum()/X_THREAD, 1, 1);
 
-        
+        /*
         //Equation of Motion of Charged Particles
         ParticleData[] particles = new ParticleData[_ParticleCount];
         for (int i = 0; i < _ParticleCount; i++)
@@ -168,7 +171,7 @@ public class ComputeShaderScript : MonoBehaviour {
         }
         _ParticleDataBuffer = new ComputeBuffer(_ParticleCount, Marshal.SizeOf(typeof(ParticleData)));
         _ParticleDataBuffer.SetData(particles);
-
+        */
         int ParticleKernel = cs.FindKernel("ParticleMain");
         cs.SetBuffer(ParticleKernel, "_EVectorFieldDataBuffer", _EVectorFieldDataBuffer);
         cs.SetBuffer(ParticleKernel, "_BVectorFieldDataBuffer", _BVectorFieldDataBuffer);
@@ -216,6 +219,7 @@ public class ComputeShaderScript : MonoBehaviour {
             VFData[i].direction = DirVector[i].normalized;
             VFData[i].dirScalar = Mathf.Log10(DirScalar[i]);
             VFData[i].ftensor = GaugeField(latticePosition[i]);
+            VFData[i].latticeposition = latticePosition[i];
         }
         _EVectorFieldDataBuffer.SetData(VFData);
 
@@ -250,6 +254,7 @@ public class ComputeShaderScript : MonoBehaviour {
             VFData2[i].direction = DirVector[i].normalized;
             VFData2[i].dirScalar = Mathf.Log10(DirScalar[i]);
             VFData2[i].ftensor = GaugeField(latticePosition[i]);
+            VFData2[i].latticeposition = latticePosition[i];
         }
         _BVectorFieldDataBuffer.SetData(VFData2);
     }
@@ -269,13 +274,18 @@ public class ComputeShaderScript : MonoBehaviour {
                 position = Random.onUnitSphere * 1.1f,//position
                 color = _ParticleColor,
                 scale = 0.02f,
+                ParticlePositionWorld4 = new Vector4(0.0f, 0.0f, 0.0f, 0.0f),
+                ParticleVelocityWorld4 = new Vector4(0.0f, 0.0f, 0.0f, 0.0f)
             };
             particlePosition[i] = particles[i].position;
             particlePosition[i].w = -(particles[i].position - PlayerMove.playrposworldframe3).magnitude;
             //Debug.Log($"{particles[i].velocity}, {particles[i].position}");
             particleVelocity[i] = particles[i].velocity;
             particleVelocity[i].w = Mathf.Sqrt(1 + particles[i].velocity.magnitude * particles[i].velocity.magnitude);
+            particles[i].ParticlePositionWorld4 = particlePosition[i];
+            particles[i].ParticleVelocityWorld4 = particleVelocity[i];
         }
+
         // keep the size of ParticleData.
         _ParticleDataBuffer = new ComputeBuffer(_ParticleCount, Marshal.SizeOf(typeof(ParticleData)));
         _ParticleDataBuffer.SetData(particles);
@@ -321,7 +331,7 @@ public class ComputeShaderScript : MonoBehaviour {
     public Vector4 A(float x, float y, float z, float t)
     {
         float r = (new Vector3(x, y, z)).magnitude;
-        return new Vector4(0, 0, 0, 10f / r);
+        return new Vector4(0, 0, 0, 10.0f / r);
     }
 
     public Matrix4x4 dA(Vector4 p)

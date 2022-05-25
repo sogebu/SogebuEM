@@ -337,8 +337,8 @@ MonoBehaviour:
     e32: 0
     e33: 0
   qoverm: 0
-  unitAccel: 0.2
-  decceleration: 0.1
+  unitAccel: 0.4
+  decceleration: 0.3
 --- !u!850595691 &1248531434
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -475,7 +475,7 @@ MonoBehaviour:
   ObjectScale: {x: 0.1, y: 1, z: 0.1}
   csScript: {fileID: 1510263236}
   InstanceMesh: {fileID: 4300000, guid: 33b0feee67c1f4ce29760a80d5b7974c, type: 2}
-  InstanceRenderMaterial: {fileID: 2100000, guid: 42b6e28c347114c509fb2ccd8c1ace3d,
+  InstanceRenderMaterial: {fileID: 2100000, guid: 18f4d230459e246dc87df41a7b2646a2,
     type: 2}
 --- !u!114 &1510263238
 MonoBehaviour:
@@ -505,8 +505,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e273c8a33df144a4919c371a2eb8b48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ObjectScale: {x: 0.2, y: 1.5, z: 0.2}
+  BObjectScale: {x: 0.2, y: 1.5, z: 0.2}
   csScript: {fileID: 1510263236}
   InstanceMesh: {fileID: 4300000, guid: 33b0feee67c1f4ce29760a80d5b7974c, type: 2}
-  InstanceRenderMaterial: {fileID: 2100000, guid: 4dfc2cfc85f194e0abbcb3bce7506677,
+  InstanceRenderMaterial: {fileID: 2100000, guid: 8cb8e9e49eed34855808083f892e561d,
     type: 2}

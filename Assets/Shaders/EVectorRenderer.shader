@@ -30,6 +30,7 @@
 			float3 direction;
 			float dirScalar;
 			float4x4 ftensor;
+			float4 latticeposition;
 		};
 
 		#ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
@@ -146,6 +147,7 @@
 			object2world._11_22_33_44 = float4(scl.xyz, 1.0);
 
 			// quaternion回転行列をかける
+
 			object2world = mul(quaternion_to_matrix(from_to_rotation(float3(0.0, 1.0, 0.0), VFData.direction)), object2world);
 
 			object2world._14_24_34 = pos.xyz;
@@ -153,6 +155,7 @@
 			// // 頂点を座標変換
 			v.vertex = mul(object2world, v.vertex);
 			// 法線を座標変換
+
 			v.normal = normalize(mul(object2world, v.normal));
 			#endif
 		}

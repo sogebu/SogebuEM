@@ -22,6 +22,8 @@
                 float3 position;
                 float4 color;
                 float scale;
+                float4 ParticlePositionWorld4;
+                float4 ParticleVelocityWorld4;
             };
 
             struct appdata

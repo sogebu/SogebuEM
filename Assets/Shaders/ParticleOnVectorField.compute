@@ -15,6 +15,7 @@ struct VectorField {
     float3 direction;
     float dirScalar;
     float4x4 ftensor;
+    float4 latticeposition;
 };
 
 struct Particle {
@@ -22,6 +23,8 @@ struct Particle {
     float3 position;
     float4 color;
     float scale;
+    float4 ParticlePositionWorld4;
+    float4 ParticleVelocityWorld4;
 };
 
 RWStructuredBuffer<VectorField> _EVectorFieldDataBuffer;
@@ -32,15 +35,83 @@ float _DeltaTime;
 float _FrameCount;
 
 float4x4 Lplayer;
+float4x4 Linv;
 float4x4 R;
 float4 playrposworldframe4;
 float4 playrvelworldframe4;
-float4 ParticlePositionWorld4[10000];
-float4 ParticleVelocityWorld4[10000];
 
-float LorentzInnerProduct(float4 u1, float4 u2)
+float4 A(float x, float y, float z, float t)
 {
-    return u1.x * u2.x + u1.y * u2.y + u1.z * u2.z - u1.w * u2.w;
+    float r = length(float3(x, y, z));
+    return float4(0, 0, 0, 10.0 / r);
+}    
+
+float4x4 dA(float4 p)
+{
+    float4x4 D;
+    D[0][0] = (A(p.x + 1e-6, p.y, p.z, p.w).x - A(p.x - 1e-6, p.y, p.z, p.w).x) / (2e-6);
+    D[0][1] = (A(p.x, p.y + 1e-6, p.z, p.w).x - A(p.x, p.y - 1e-6, p.z, p.w).x) / (2e-6);
+    D[0][2] = (A(p.x, p.y, p.z + 1e-6, p.w).x - A(p.x, p.y, p.z - 1e-6, p.w).x) / (2e-6);
+    D[0][3] = (A(p.x, p.y, p.z, p.w + 1e-6).x - A(p.x, p.y, p.z, p.w - 1e-6).x) / (2e-6);
+
+    D[1][0] = (A(p.x + 1e-6, p.y, p.z, p.w).y - A(p.x - 1e-6, p.y, p.z, p.w).y) / (2e-6);
+    D[1][1] = (A(p.x, p.y + 1e-6, p.z, p.w).y - A(p.x, p.y - 1e-6, p.z, p.w).y) / (2e-6);
+    D[1][2] = (A(p.x, p.y, p.z + 1e-6, p.w).y - A(p.x, p.y, p.z - 1e-6, p.w).y) / (2e-6);
+    D[1][3] = (A(p.x, p.y, p.z, p.w + 1e-6).y - A(p.x, p.y, p.z, p.w - 1e-6).y) / (2e-6);
+
+    D[2][0] = (A(p.x + 1e-6, p.y, p.z, p.w).z - A(p.x - 1e-6, p.y, p.z, p.w).z) / (2e-6);
+    D[2][1] = (A(p.x, p.y + 1e-6, p.z, p.w).z - A(p.x, p.y - 1e-6, p.z, p.w).z) / (2e-6);
+    D[2][2] = (A(p.x, p.y, p.z + 1e-6, p.w).z - A(p.x, p.y, p.z - 1e-6, p.w).z) / (2e-6);
+    D[2][3] = (A(p.x, p.y, p.z, p.w + 1e-6).z - A(p.x, p.y, p.z, p.w - 1e-6).z) / (2e-6);
+
+    D[3][0] = (A(p.x + 1e-6, p.y, p.z, p.w).w - A(p.x - 1e-6, p.y, p.z, p.w).w) / (2e-6);
+    D[3][1] = (A(p.x, p.y + 1e-6, p.z, p.w).w - A(p.x, p.y - 1e-6, p.z, p.w).w) / (2e-6);
+    D[3][2] = (A(p.x, p.y, p.z + 1e-6, p.w).w - A(p.x, p.y, p.z - 1e-6, p.w).w) / (2e-6);
+    D[3][3] = (A(p.x, p.y, p.z, p.w + 1e-6).w - A(p.x, p.y, p.z, p.w - 1e-6).w) / (2e-6);
+
+    return D;
+}    
+
+float4x4 GaugeField(float4 x)
+{
+   float4x4 K;
+
+   K[0][0] = 0;
+   K[0][3] = dA(x)[0][3] - dA(x)[3][0];
+   K[1][3] = dA(x)[1][3] - dA(x)[3][1];
+   K[2][3] = dA(x)[2][3] - dA(x)[3][2];
+
+   K[1][0] = dA(x)[1][0] - dA(x)[0][1];
+   K[1][1] = 0;
+   K[0][1] = dA(x)[0][1] - dA(x)[1][0];
+   K[0][2] = dA(x)[0][2] - dA(x)[2][0];
+   K[2][0] = dA(x)[2][0] - dA(x)[0][2];
+   K[1][2] = dA(x)[1][2] - dA(x)[2][1];
+   K[2][2] = 0;
+   K[2][1] = dA(x)[2][1] - dA(x)[1][2];
+
+   K[3][0] = dA(x)[3][0] - dA(x)[0][3];
+   K[3][1] = dA(x)[3][1] - dA(x)[1][3];
+   K[3][2] = dA(x)[3][2] - dA(x)[2][3];
+   K[3][3] = 0;
+
+   return K;
+}    
+float lip(float4 v1, float4 v2)
+{
+   return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z - v1.w * v2.w;
+}        
+
+float lSqN(float4 v)
+{
+   return v.x * v.x + v.y * v.y + v.z * v.z - v.w * v.w;
+}             
+
+float dtau(float4 Xp, float4 Xn, float4 Vp, float4 Vn)
+{
+   float cp = lip(Vp, Vp) * _DeltaTime * _DeltaTime + 2 * lip(Vp, Xp - Xn) * _DeltaTime;
+   float dtau = lip(Vn, Xn - Xp - Vp * _DeltaTime) - sqrt(lip(Vn, Xn - Xp - Vp * _DeltaTime) * lip(Vn, Xn - Xp - Vp * _DeltaTime) - cp * lip(Vn, Vn));
+   return dtau;          
 }
 
 [numthreads(NUM_THREAD_X, 1, 1)]
@@ -54,7 +125,7 @@ void VectorFieldMain (
     uint bufferIndex = id.x;
     VectorField Evf = _EVectorFieldDataBuffer[bufferIndex];
     VectorField Bvf = _BVectorFieldDataBuffer[bufferIndex];
-
+    
     //float3 noiseSeed = Evf.position * 0.05;
     //float fc = _FrameCount * 0.04;
     //Evf.direction = Pnoise(noiseSeed * fc);
@@ -65,11 +136,16 @@ void VectorFieldMain (
     //latticeposworld.w = -sqrt(dot(latticeplayerdir, latticeplayerdir));
     //latticeposworld = mul(Lplayer, latticeposworld);
     //Evf.position = latticeposworld.xyz;
-    float4x4 F = mul(mul(Lplayer, Evf.ftensor), Lplayer);
+    float4x4 F = mul(mul(Linv, Evf.ftensor), Linv);
+    float4 lpos = Evf.latticeposition;
+    lpos.w += dtau(playrposworldframe4, lpos, playrvelworldframe4, float4(0.0, 0.0, 0.0, 1.0));
+    float4 lposrestframe = mul(Lplayer, lpos);
+    Evf.position = lposrestframe.xyz;
+    Bvf.position = lposrestframe.xyz;
     Evf.direction = normalize(float3(F[0][3], F[1][3], F[2][3]));
-    Evf.dirScalar = length(float3(F[0][3], F[1][3], F[2][3]));
+    Evf.dirScalar = log10(1.0 + length(float3(F[0][3], F[1][3], F[2][3])));
     Bvf.direction = normalize(float3(F[1][2], F[2][0], F[0][1]));
-    Bvf.dirScalar = length(float3(F[1][2], F[2][0], F[0][1]));
+    Bvf.dirScalar = log10(1.0 + length(float3(F[1][2], F[2][0], F[0][1])));
     _EVectorFieldDataBuffer[bufferIndex] = Evf;
     _BVectorFieldDataBuffer[bufferIndex] = Bvf;
 }
@@ -91,7 +167,7 @@ void ParticleMain (uint3 id : SV_DispatchThreadID)
 
         float3 particleplayerdir = playrposworldframe4.xyz - p.position;
         float dtau = LorentzInnerProduct(ParticleVelocityWorld4, ParticlePositionWorld4 - playrposworldframe4) - sqrt(LorentzInnerProduct(ParticleVelocityWorld4, ParticlePositionWorld4 - playrposworldframe4) * LorentzInnerProduct(ParticleVelocityWorld4, ParticlePositionWorld4 - playrposworldframe4) - _DeltaTime * (LorentzInnerProduct(2 * ParticlePositionWorld4 - 2 * playrposworldframe4 - _DeltaTime * playrvelworldframe4, playrposworldframe4)));
-        ParticlePositionWorld4.w += dtau;
+        p.ParticlePositionWorld4.w += dtau;
         if (dist <= 1.0) {
             p.velocity += Evf.direction * Evf.dirScalar * 0.05 * dtau;
             p.position += p.velocity * dtau;
@@ -100,5 +176,13 @@ void ParticleMain (uint3 id : SV_DispatchThreadID)
         p.position = ParticlePositionWorld4.xyz;
     }
     */
+    //Electromagnetic Tensor Component for particles
+    p.ParticlePositionWorld4.w += dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
+    float4x4 F = GaugeField(p.ParticlePositionWorld4);
+
+    p.ParticleVelocityWorld4 += 1e-2f * float4(F[0][3], F[1][3], F[2][3], 0.0) * dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
+    p.ParticlePositionWorld4 += p.ParticleVelocityWorld4 * dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);//position
+    float4 positionrestframe = mul(Lplayer, p.ParticlePositionWorld4);
+    p.position = positionrestframe.xyz;
     _ParticleDataBuffer[index] = p;
-}
+}            

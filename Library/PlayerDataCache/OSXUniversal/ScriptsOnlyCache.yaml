@@ -1,6 +1,7 @@
 ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
+    - BVectorFieldRenderer
     - ComputeShaderScript
     - EVectorFieldRenderer
     - ParticleRenderer
@@ -37,6 +38,8 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 108
       Script: {instanceID: 0}
+    - Class: 114
+      Script: {instanceID: 1904}
     - Class: 114
       Script: {instanceID: 3046}
     - Class: 114
@@ -128,7 +131,7 @@ ScriptsOnlyBuild:
     className: TMP_FontAsset
   - hash:
       serializedVersion: 2
-      Hash: c3f7de108af139c8d0506791318e7318
+      Hash: 4dd39d1c089b986be31ec571692b5e5c
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: BVectorFieldRenderer
@@ -525,4 +528,4 @@ ScriptsOnlyBuild:
   platform: 2
   scenePathNames:
   - Assets/Scenes/SampleScene.unity
-  playerPath: /Users/koichiromacmini/Documents/programming/programming/cs_file/ParticleOnVectorField-main/20220523.app
+  playerPath: /Users/koichiromacmini/Documents/programming/programming/cs_file/ParticleOnVectorField-main/20220525.app

@@ -1,14 +1,15 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Shaders/EVectorRenderer.shader">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Shaders/ParticleRenderer.shader">
     <Files>
       <File FileName="Assets/Scripts/ParticleRenderer.cs" Line="70" Column="33" />
-      <File FileName="Assets/Scripts/ComputeShaderScript.cs" Line="252" Column="15" />
-      <File FileName="Assets/Shaders/ParticleOnVectorField.compute" Line="72" Column="31" />
-      <File FileName="Assets/Scripts/PlayerMove.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/EVectorFieldRenderer.cs" Line="8" Column="23" />
-      <File FileName="Assets/Scripts/BVectorFieldRenderer.cs" Line="87" Column="35" />
-      <File FileName="Assets/Shaders/BVectorRenderer.shader" Line="32" Column="21" />
-      <File FileName="Assets/Shaders/EVectorRenderer.shader" Line="32" Column="16" />
+      <File FileName="Assets/Scripts/ComputeShaderScript.cs" Line="250" Column="29" />
+      <File FileName="Assets/Shaders/ParticleOnVectorField.compute" Line="25" Column="5" />
+      <File FileName="Assets/Scripts/PlayerMove.cs" />
+      <File FileName="Assets/Scripts/EVectorFieldRenderer.cs" />
+      <File FileName="Assets/Scripts/BVectorFieldRenderer.cs" />
+      <File FileName="Assets/Shaders/BVectorRenderer.shader" />
+      <File FileName="Assets/Shaders/EVectorRenderer.shader" />
+      <File FileName="Assets/Shaders/ParticleRenderer.shader" Line="26" Column="37" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

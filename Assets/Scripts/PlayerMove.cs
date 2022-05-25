@@ -13,6 +13,7 @@ public class PlayerMove : MonoBehaviour
     //public Vector4 LorentzForceworldframe;
 
     public Matrix4x4 Lplayer;
+    public Matrix4x4 LplayerInverse;
     private Matrix4x4 R;
     private Matrix4x4 Ftensor;
     private Matrix4x4 metrictensor;
@@ -29,6 +30,7 @@ public class PlayerMove : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Log($"norm = {(new Vector3(0.0f, 0.0f, 0.0f)).normalized}");
         //importing ArrowDirection for Electromagnetic Effects
         //ArrowDirection2 = emfields.GetComponent<ArrowDirection2>();
         //GeneralRelmetric = metric.GetComponent<GeneralRelmetric>();
@@ -47,7 +49,7 @@ public class PlayerMove : MonoBehaviour
 
         //defining the initial Lorentz transformation
         Lplayer = Matrix4x4.identity;
-
+        LplayerInverse = Matrix4x4.identity;
         //defining metric tensor
         //metrictensor = Matrix4x4.identity;
         //metrictensor.m33 = -1;
@@ -128,6 +130,7 @@ public class PlayerMove : MonoBehaviour
         //updating player's Lorentz transformation
         //Lplayer has upper and lower indices: (0,1,2,3) is (x,y,z,w), where w is t.
         Lplayer = LTrans(playrvelworldframe3);
+        LplayerInverse = LTrans(-1.0f * playrvelworldframe3);
 
         //
         playrposworldframe4 += playrvelworldframe4 * Time.deltaTime;
@@ -135,6 +138,7 @@ public class PlayerMove : MonoBehaviour
 
         this.transform.position = Lplayer * playrposworldframe4;
         Shader.SetGlobalMatrix("Lplayer", Lplayer);
+        Shader.SetGlobalMatrix("Linv", LplayerInverse);
         Shader.SetGlobalVector("playrposworldframe4", playrposworldframe4);
         Shader.SetGlobalVector("playrvelworldframe4", playrvelworldframe4);
     }
