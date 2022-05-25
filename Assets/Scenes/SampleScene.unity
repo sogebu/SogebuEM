@@ -319,7 +319,25 @@ MonoBehaviour:
   playrvelworldframe3: {x: 0, y: 0, z: 0}
   playrvelworldframe4: {x: 0, y: 0, z: 0, w: 0}
   playraccelworldframe3: {x: 0, y: 0, z: 0}
+  LorentzForceworldframe: {x: 0, y: 0, z: 0, w: 0}
   Lplayer:
+    e00: 0
+    e01: 0
+    e02: 0
+    e03: 0
+    e10: 0
+    e11: 0
+    e12: 0
+    e13: 0
+    e20: 0
+    e21: 0
+    e22: 0
+    e23: 0
+    e30: 0
+    e31: 0
+    e32: 0
+    e33: 0
+  LplayerInverse:
     e00: 0
     e01: 0
     e02: 0
@@ -457,7 +475,7 @@ MonoBehaviour:
   m1: 0
   m2: 0
   _cs: {fileID: 7200000, guid: db47c581e06564531948a2c49ee900a4, type: 3}
-  _ParticleCount: 1500
+  _ParticleCount: 4000
   _ParticleColor: {r: 0.5990566, g: 0.5990566, b: 1, a: 1}
   DebugDir: {x: 1, y: 0, z: 0}
 --- !u!114 &1510263237

@@ -1,7 +1,7 @@
 ﻿#pragma kernel VectorFieldMain
 #pragma kernel ParticleMain
 
-#define NUM_THREAD_X 10*10*10
+#define NUM_THREAD_X 1000
 #define NUM_THREAD_Y 1
 #define NUM_THREAD_Z 1
 #define PI 3.14159265
@@ -129,13 +129,6 @@ void VectorFieldMain (
     //float3 noiseSeed = Evf.position * 0.05;
     //float fc = _FrameCount * 0.04;
     //Evf.direction = Pnoise(noiseSeed * fc);
-    //Evf.dirScalar = sqrt(dot(Evf.direction, Evf.direction));
-    //float4 latticeposworld;
-    //latticeposworld.xyz = Evf.position;
-    //float3 latticeplayerdir = playrposworldframe4.xyz - Evf.position;
-    //latticeposworld.w = -sqrt(dot(latticeplayerdir, latticeplayerdir));
-    //latticeposworld = mul(Lplayer, latticeposworld);
-    //Evf.position = latticeposworld.xyz;
     float4x4 F = mul(mul(Linv, Evf.ftensor), Linv);
     float4 lpos = Evf.latticeposition;
     lpos.w += dtau(playrposworldframe4, lpos, playrvelworldframe4, float4(0.0, 0.0, 0.0, 1.0));
@@ -155,27 +148,6 @@ void ParticleMain (uint3 id : SV_DispatchThreadID)
 {
     int index = id.x;
     Particle p = _ParticleDataBuffer[index];
-    /*
-    for (int i = 0; i < NUM_THREAD_X; i++) {
-        //関数にしよう。粒子の速度と位置のみで決まる
-        float4 ParticlePositionWorld4;
-        float4 ParticleVelocityWorld4;
-        ParticlePositionWorld4.xyz = p.position;
-        ParticlePositionWorld4.w = 0;//-sqrt(dot(p.position - playrposworldframe4.xyz, p.position - playrposworldframe4.xyz)) 
-        ParticleVelocityWorld4.xyz = p.velocity;
-        ParticleVelocityWorld4.w = sqrt(1 + dot(p.velocity, p.velocity));
-
-        float3 particleplayerdir = playrposworldframe4.xyz - p.position;
-        float dtau = LorentzInnerProduct(ParticleVelocityWorld4, ParticlePositionWorld4 - playrposworldframe4) - sqrt(LorentzInnerProduct(ParticleVelocityWorld4, ParticlePositionWorld4 - playrposworldframe4) * LorentzInnerProduct(ParticleVelocityWorld4, ParticlePositionWorld4 - playrposworldframe4) - _DeltaTime * (LorentzInnerProduct(2 * ParticlePositionWorld4 - 2 * playrposworldframe4 - _DeltaTime * playrvelworldframe4, playrposworldframe4)));
-        p.ParticlePositionWorld4.w += dtau;
-        if (dist <= 1.0) {
-            p.velocity += Evf.direction * Evf.dirScalar * 0.05 * dtau;
-            p.position += p.velocity * dtau;
-        }
-        ParticlePositionWorld4 = mul(Lplayer, ParticlePositionWorld4);
-        p.position = ParticlePositionWorld4.xyz;
-    }
-    */
     //Electromagnetic Tensor Component for particles
     p.ParticlePositionWorld4.w += dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
     float4x4 F = GaugeField(p.ParticlePositionWorld4);

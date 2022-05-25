@@ -55,7 +55,7 @@ public class ComputeShaderScript : MonoBehaviour {
     //public Material material;
 
     #region Particle Parameter
-    [SerializeField] private int _ParticleCount = 1500;
+    [SerializeField] private int _ParticleCount = 5000;
     [SerializeField] private Color _ParticleColor = Color.blue;
     [SerializeField] public Vector3 DebugDir = new Vector3(1, 0, 0);
     #endregion
@@ -124,8 +124,6 @@ public class ComputeShaderScript : MonoBehaviour {
         PlayerMove = player.GetComponent<PlayerMove>();
         InitializeVectorFieldComputeBuffer();
         InitializeParticleComputeBuffer();
-        //Shader.SetGlobalVector("ParticlePositionWorld4", new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
-        //Shader.SetGlobalVector("ParticlePositionWorld4", new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
     }
 
     /// <summary>
@@ -143,44 +141,11 @@ public class ComputeShaderScript : MonoBehaviour {
         //Debug.Log($"VectorFieldKernelDataIndex = {VectorFieldKernel}");
         cs.Dispatch(VectorFieldKernel, GetGridNum()/X_THREAD, 1, 1);
 
-        /*
-        //Equation of Motion of Charged Particles
-        ParticleData[] particles = new ParticleData[_ParticleCount];
-        for (int i = 0; i < _ParticleCount; i++)
-        {
-            //Electromagnetic Tensor Component for particles
-            particlePosition[i].w += dtau(PlayerMove.playrposworldframe4, particlePosition[i], PlayerMove.playrvelworldframe4, particleVelocity[i]);
-            Matrix4x4 F = GaugeField(particlePosition[i]);
-
-            particleVelocity[i] += 1e-2f * new Vector4(F.m03, F.m13, F.m23, 0.0f) * dtau(PlayerMove.playrposworldframe4, particlePosition[i], PlayerMove.playrvelworldframe4, particleVelocity[i]);
-            particlePosition[i] += particleVelocity[i] * dtau(PlayerMove.playrposworldframe4, particlePosition[i], PlayerMove.playrvelworldframe4, particleVelocity[i]);//position
-            //Debug.Log($"{particleVelocity[i]}, {particlePosition[i]}");
-            particles[i] = new ParticleData
-            {
-                velocity = new Vector3(particleVelocity[i].x, particleVelocity[i].y, particleVelocity[i].z),
-                position = new Vector3(particlePosition[i].x, particlePosition[i].y, particlePosition[i].z),//position
-                color = _ParticleColor,
-                scale = 0.02f,
-            };
-        }
-        // keep the size of ParticleData.
-        if (_ParticleDataBuffer != null)
-        {
-            _ParticleDataBuffer.Release();
-            _ParticleDataBuffer = null;
-        }
-        _ParticleDataBuffer = new ComputeBuffer(_ParticleCount, Marshal.SizeOf(typeof(ParticleData)));
-        _ParticleDataBuffer.SetData(particles);
-        */
         int ParticleKernel = cs.FindKernel("ParticleMain");
         cs.SetBuffer(ParticleKernel, "_EVectorFieldDataBuffer", _EVectorFieldDataBuffer);
         cs.SetBuffer(ParticleKernel, "_BVectorFieldDataBuffer", _BVectorFieldDataBuffer);
         cs.SetBuffer(ParticleKernel, "_ParticleDataBuffer", _ParticleDataBuffer);
         cs.SetFloat("_DeltaTime", Time.deltaTime);
-        //Debug.Log($"ParticleKernelDataIndex = {ParticleKernel}");
-        //Debug.Log($"_ParticleCount/X_THREAD = {_ParticleCount / X_THREAD}");
-        //ここが問題
-        //Debug.Log($"cs.Dispatch(ParticleKernel, _ParticleCount / X_THREAD, 1, 1) = {cs.Dispatch(1, 1, 1, 1)}");
         cs.Dispatch(ParticleKernel, _ParticleCount / X_THREAD, 1, 1);
     }
 
@@ -289,43 +254,6 @@ public class ComputeShaderScript : MonoBehaviour {
         // keep the size of ParticleData.
         _ParticleDataBuffer = new ComputeBuffer(_ParticleCount, Marshal.SizeOf(typeof(ParticleData)));
         _ParticleDataBuffer.SetData(particles);
-    }
-
-    public Vector3 rR(Vector3 v1, Vector3 v2)
-    {
-        return v1 - v2;
-    }
-
-    public Vector3 field(Vector3 r, float q1)
-    {
-        float ep = 1.0f;
-        return (q1 / (ep * Mathf.Pow(r.magnitude, 3.0f))) * r;
-    }
-
-    public Matrix4x4 K(Vector3 v1, Vector3 v2)
-    {
-        Matrix4x4 K = Matrix4x4.identity;
-
-        K.m00 = 0;
-        K.m03 = v1.x;
-        K.m13 = v1.y;
-        K.m23 = v1.z;
-
-        K.m10 = -v2.z;
-        K.m11 = 0;
-        K.m01 = v2.z;
-        K.m02 = -v2.y;
-        K.m20 = v2.y;
-        K.m12 = v2.x;
-        K.m22 = 0;
-        K.m21 = -v2.x;
-
-        K.m30 = -v1.x;
-        K.m31 = -v1.y;
-        K.m32 = -v1.z;
-        K.m33 = 0;
-
-        return K;
     }
 
     public Vector4 A(float x, float y, float z, float t)

@@ -143,7 +143,7 @@ Shader "myShader/BVectorRenderer"
 			// オブジェクト座標からワールド座標に変換する行列を定義
 			float4x4 object2world = (float4x4)0;
 			// スケール値を代入
-			scl.y *= VFData.dirScalar*0.5 + 0.25;
+			scl.y *= VFData.dirScalar;
 			object2world._11_22_33_44 = float4(scl.xyz, 1.0);
 
 			// quaternion回転行列をかける

@@ -10,7 +10,7 @@ public class PlayerMove : MonoBehaviour
     public Vector4 playrvelworldframe4;
     public Vector3 playraccelworldframe3;
     private Vector4 playraccelworldframe4;
-    //public Vector4 LorentzForceworldframe;
+    public Vector4 LorentzForceworldframe;
 
     public Matrix4x4 Lplayer;
     public Matrix4x4 LplayerInverse;
@@ -51,20 +51,18 @@ public class PlayerMove : MonoBehaviour
         Lplayer = Matrix4x4.identity;
         LplayerInverse = Matrix4x4.identity;
         //defining metric tensor
-        //metrictensor = Matrix4x4.identity;
-        //metrictensor.m33 = -1;
-        //metrictensor = GeneralRelmetric.metrictensor;
+        metrictensor = Matrix4x4.identity;
+        metrictensor.m33 = -1;
 
-        //defining effective chargeovermass of player
-        //qoverm = 0.0f;
+        //defining effective chargeovermass of player by qoverm
 
         //defining unit acceleration
         //unitAccel = 0.1f;
 
         //defining Electromagnetic tensor at player's position
-        //Ftensor = ArrowDirection2.G;
+        Ftensor = GaugeField(playrposworldframe4);
         //defining Lorentz Force in world frame
-        //LorentzForceworldframe = qoverm * (metrictensor * Ftensor * playrvelworldframe4);
+        LorentzForceworldframe = qoverm * (metrictensor * Ftensor * playrvelworldframe4);
         Shader.SetGlobalMatrix("Lplayer", Lplayer);
         Shader.SetGlobalVector("playrposworldframe4", playrposworldframe4);
         Shader.SetGlobalVector("playrvelworldframe4", playrvelworldframe4);
@@ -75,7 +73,7 @@ public class PlayerMove : MonoBehaviour
     void FixedUpdate()
     {
         //defining Electromagnetic tensor at player's position
-        //Ftensor = ArrowDirection2.G;
+        Ftensor = GaugeField(playrposworldframe4);
 
         //Defining Rotation Matrix by using Quartanion
         Quaternion q = transform.rotation.normalized;
@@ -114,10 +112,10 @@ public class PlayerMove : MonoBehaviour
         }
 
         //LForce is a vector in world frame
-        //LorentzForceworldframe = qoverm * (metrictensor * Ftensor * playrvelworldframe4);
+        LorentzForceworldframe = qoverm * (metrictensor * Ftensor * playrvelworldframe4);
 
         //
-        playraccelworldframe4 += - playrvelworldframe4 * decceleration;// 0.15f
+        playraccelworldframe4 += LorentzForceworldframe - playrvelworldframe4 * decceleration;// 0.15f
         playraccelworldframe3 = playraccelworldframe4;
 
         //
@@ -157,15 +155,6 @@ public class PlayerMove : MonoBehaviour
     {
         return new Vector4(m1.m03 * v1.w, m1.m13 * v1.w, m1.m23 * v1.w, 0);
     }
-    private float lip(Vector4 v1, Vector4 v2) //Lorentzian inner product
-    {
-        return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z - v1.w * v2.w;
-    }
-
-    private float lSqN(Vector4 v) //Lorentzian squared norm
-    {
-        return v.x * v.x + v.y * v.y + v.z * v.z - v.w * v.w;
-    }
 
     public Matrix4x4 LTrans(Vector3 u3)
     {
@@ -192,5 +181,79 @@ public class PlayerMove : MonoBehaviour
 
         L.m33 = u4.w;
         return L;
+    }
+
+    public Vector4 A(float x, float y, float z, float t)
+    {
+        float r = (new Vector3(x, y, z)).magnitude;
+        return new Vector4(0, 0, 0, 10.0f / r);
+    }
+
+    public Matrix4x4 dA(Vector4 p)
+    {
+        Matrix4x4 D = Matrix4x4.identity;
+        D.m00 = (A(p.x + 1e-6f, p.y, p.z, p.w).x - A(p.x - 1e-6f, p.y, p.z, p.w).x) / (2e-6f);
+        D.m01 = (A(p.x, p.y + 1e-6f, p.z, p.w).x - A(p.x, p.y - 1e-6f, p.z, p.w).x) / (2e-6f);
+        D.m02 = (A(p.x, p.y, p.z + 1e-6f, p.w).x - A(p.x, p.y, p.z - 1e-6f, p.w).x) / (2e-6f);
+        D.m03 = (A(p.x, p.y, p.z, p.w + 1e-6f).x - A(p.x, p.y, p.z, p.w - 1e-6f).x) / (2e-6f);
+
+        D.m10 = (A(p.x + 1e-6f, p.y, p.z, p.w).y - A(p.x - 1e-6f, p.y, p.z, p.w).y) / (2e-6f);
+        D.m11 = (A(p.x, p.y + 1e-6f, p.z, p.w).y - A(p.x, p.y - 1e-6f, p.z, p.w).y) / (2e-6f);
+        D.m12 = (A(p.x, p.y, p.z + 1e-6f, p.w).y - A(p.x, p.y, p.z - 1e-6f, p.w).y) / (2e-6f);
+        D.m13 = (A(p.x, p.y, p.z, p.w + 1e-6f).y - A(p.x, p.y, p.z, p.w - 1e-6f).y) / (2e-6f);
+
+        D.m20 = (A(p.x + 1e-6f, p.y, p.z, p.w).z - A(p.x - 1e-6f, p.y, p.z, p.w).z) / (2e-6f);
+        D.m21 = (A(p.x, p.y + 1e-6f, p.z, p.w).z - A(p.x, p.y - 1e-6f, p.z, p.w).z) / (2e-6f);
+        D.m22 = (A(p.x, p.y, p.z + 1e-6f, p.w).z - A(p.x, p.y, p.z - 1e-6f, p.w).z) / (2e-6f);
+        D.m23 = (A(p.x, p.y, p.z, p.w + 1e-6f).z - A(p.x, p.y, p.z, p.w - 1e-6f).z) / (2e-6f);
+
+        D.m30 = (A(p.x + 1e-6f, p.y, p.z, p.w).w - A(p.x - 1e-6f, p.y, p.z, p.w).w) / (2e-6f);
+        D.m31 = (A(p.x, p.y + 1e-6f, p.z, p.w).w - A(p.x, p.y - 1e-6f, p.z, p.w).w) / (2e-6f);
+        D.m32 = (A(p.x, p.y, p.z + 1e-6f, p.w).w - A(p.x, p.y, p.z - 1e-6f, p.w).w) / (2e-6f);
+        D.m33 = (A(p.x, p.y, p.z, p.w + 1e-6f).w - A(p.x, p.y, p.z, p.w - 1e-6f).w) / (2e-6f);
+
+        return D;
+    }
+
+    public Matrix4x4 GaugeField(Vector4 x)
+    {
+        Matrix4x4 K = Matrix4x4.identity;
+
+        K.m00 = 0;
+        K.m03 = dA(x).m03 - dA(x).m30;
+        K.m13 = dA(x).m13 - dA(x).m31;
+        K.m23 = dA(x).m23 - dA(x).m32;
+
+        K.m10 = dA(x).m10 - dA(x).m01;
+        K.m11 = 0;
+        K.m01 = dA(x).m01 - dA(x).m10;
+        K.m02 = dA(x).m02 - dA(x).m20;
+        K.m20 = dA(x).m20 - dA(x).m02;
+        K.m12 = dA(x).m12 - dA(x).m21;
+        K.m22 = 0;
+        K.m21 = dA(x).m21 - dA(x).m12;
+
+        K.m30 = dA(x).m30 - dA(x).m03;
+        K.m31 = dA(x).m31 - dA(x).m13;
+        K.m32 = dA(x).m32 - dA(x).m23;
+        K.m33 = 0;
+
+        return K;
+    }
+    private float lip(Vector4 v1, Vector4 v2) //Lorentzian inner product
+    {
+        return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z - v1.w * v2.w;
+    }
+
+    private float lSqN(Vector4 v) //Lorentzian squared norm
+    {
+        return v.x * v.x + v.y * v.y + v.z * v.z - v.w * v.w;
+    }
+
+    private float dtau(Vector4 Xp, Vector4 Xn, Vector4 Vp, Vector4 Vn)
+    {
+        float cp = lip(Vp, Vp) * Time.deltaTime * Time.deltaTime + 2 * lip(Vp, Xp - Xn) * Time.deltaTime;
+        float dtau = lip(Vn, Xn - Xp - Vp * Time.deltaTime) - Mathf.Sqrt(lip(Vn, Xn - Xp - Vp * Time.deltaTime) * lip(Vn, Xn - Xp - Vp * Time.deltaTime) - cp * lip(Vn, Vn));
+        return dtau;
     }
 }
