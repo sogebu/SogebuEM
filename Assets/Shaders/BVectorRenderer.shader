@@ -11,7 +11,7 @@ Shader "myShader/BVectorRenderer"
 	{
 		Tags { "RenderType"="Opaque" }
 		LOD 200
-
+		
 		CGPROGRAM
 		#pragma surface surf Standard fullforwardshadows vertex:vert
 		#pragma instancing_options procedural:setup

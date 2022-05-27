@@ -40,11 +40,12 @@ float4x4 R;
 float4 playrposworldframe4;
 float4 playrvelworldframe4;
 
+//A has upper index: (0,1,2,3) is (x,y,z,w), where w is t.
 float4 A(float x, float y, float z, float t)
 {
     float r = length(float3(x, y, z));
     return float4(0, 0, 0, 10.0 / r);
-}    
+}
 
 float4x4 dA(float4 p)
 {
@@ -71,17 +72,17 @@ float4x4 dA(float4 p)
 
     return D;
 }    
-
+//Electromagnetic Tensor has only upper indices: (0,1,2,3) is (x,y,z,w), where w is t.
 float4x4 GaugeField(float4 x)
 {
    float4x4 K;
 
    K[0][0] = 0;
-   K[0][3] = dA(x)[0][3] - dA(x)[3][0];
-   K[1][3] = dA(x)[1][3] - dA(x)[3][1];
-   K[2][3] = dA(x)[2][3] - dA(x)[3][2];
+   K[0][3] = dA(x)[0][3] + dA(x)[3][0];
+   K[1][3] = dA(x)[1][3] + dA(x)[3][1];
+   K[2][3] = dA(x)[2][3] + dA(x)[3][2];
 
-   K[1][0] = dA(x)[1][0] - dA(x)[0][1];
+   K[1][0] = dA(x)[1][0] + dA(x)[0][1];
    K[1][1] = 0;
    K[0][1] = dA(x)[0][1] - dA(x)[1][0];
    K[0][2] = dA(x)[0][2] - dA(x)[2][0];
@@ -90,9 +91,9 @@ float4x4 GaugeField(float4 x)
    K[2][2] = 0;
    K[2][1] = dA(x)[2][1] - dA(x)[1][2];
 
-   K[3][0] = dA(x)[3][0] - dA(x)[0][3];
-   K[3][1] = dA(x)[3][1] - dA(x)[1][3];
-   K[3][2] = dA(x)[3][2] - dA(x)[2][3];
+   K[3][0] = -dA(x)[3][0] - dA(x)[0][3];
+   K[3][1] = -dA(x)[3][1] - dA(x)[1][3];
+   K[3][2] = -dA(x)[3][2] - dA(x)[2][3];
    K[3][3] = 0;
 
    return K;
@@ -129,14 +130,14 @@ void VectorFieldMain (
     //float3 noiseSeed = Evf.position * 0.05;
     //float fc = _FrameCount * 0.04;
     //Evf.direction = Pnoise(noiseSeed * fc);
-    float4x4 F = mul(mul(Linv, Evf.ftensor), Linv);
+    float4x4 F = mul(mul(Lplayer, Evf.ftensor), Lplayer);
     float4 lpos = Evf.latticeposition;
     lpos.w += dtau(playrposworldframe4, lpos, playrvelworldframe4, float4(0.0, 0.0, 0.0, 1.0));
     float4 lposrestframe = mul(Lplayer, lpos);
     Evf.position = lposrestframe.xyz;
     Bvf.position = lposrestframe.xyz;
-    Evf.direction = normalize(float3(F[0][3], F[1][3], F[2][3]));
-    Evf.dirScalar = log10(1.0 + length(float3(F[0][3], F[1][3], F[2][3])));
+    Evf.direction = normalize(float3(F[3][0], F[3][1], F[3][2]));
+    Evf.dirScalar = log10(1.0 + length(float3(F[3][0], F[3][1], F[3][2])));
     Bvf.direction = normalize(float3(F[1][2], F[2][0], F[0][1]));
     Bvf.dirScalar = log10(1.0 + length(float3(F[1][2], F[2][0], F[0][1])));
     _EVectorFieldDataBuffer[bufferIndex] = Evf;
@@ -151,8 +152,8 @@ void ParticleMain (uint3 id : SV_DispatchThreadID)
     //Electromagnetic Tensor Component for particles
     p.ParticlePositionWorld4.w += dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
     float4x4 F = GaugeField(p.ParticlePositionWorld4);
-
-    p.ParticleVelocityWorld4 += 1e-2f * float4(F[0][3], F[1][3], F[2][3], 0.0) * dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
+    float4x4 metrictensor = float4x4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0);
+    p.ParticleVelocityWorld4 += 0.01 * mul(F, mul(metrictensor, p.ParticleVelocityWorld4)) * dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
     p.ParticlePositionWorld4 += p.ParticleVelocityWorld4 * dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);//position
     float4 positionrestframe = mul(Lplayer, p.ParticlePositionWorld4);
     p.position = positionrestframe.xyz;

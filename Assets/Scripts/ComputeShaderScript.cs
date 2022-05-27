@@ -130,17 +130,13 @@ public class ComputeShaderScript : MonoBehaviour {
     /// 更新処理
     /// </summary>
     void Update() {
-        //Debug.Log($"ShaderGetVector = {material.GetVector("ParticlePositionWorld4")}");
         ComputeShader cs = _cs;
-        //Debug.Log($"FindKernel_VF = {cs.FindKernel("VectorFieldMain")}");
         int VectorFieldKernel = cs.FindKernel("VectorFieldMain");
         cs.SetBuffer(VectorFieldKernel, "_EVectorFieldDataBuffer", _EVectorFieldDataBuffer);
         cs.SetBuffer(VectorFieldKernel, "_BVectorFieldDataBuffer", _BVectorFieldDataBuffer);
         cs.SetFloat("_DeltaTime", Time.deltaTime);
         cs.SetFloat("_FrameCount", Time.frameCount);
-        //Debug.Log($"VectorFieldKernelDataIndex = {VectorFieldKernel}");
         cs.Dispatch(VectorFieldKernel, GetGridNum()/X_THREAD, 1, 1);
-
         int ParticleKernel = cs.FindKernel("ParticleMain");
         cs.SetBuffer(ParticleKernel, "_EVectorFieldDataBuffer", _EVectorFieldDataBuffer);
         cs.SetBuffer(ParticleKernel, "_BVectorFieldDataBuffer", _BVectorFieldDataBuffer);
@@ -167,7 +163,7 @@ public class ComputeShaderScript : MonoBehaviour {
                     latticePosition[i].w = - (Position[i] - PlayerMove.playrposworldframe3).magnitude;
                     Matrix4x4 emTensor = GaugeField(latticePosition[i]);
                     //vector field non-normalised direction at each generating position
-                    DirVector[i] = new Vector3(emTensor.m03, emTensor.m13, emTensor.m23);
+                    DirVector[i] = new Vector3(emTensor.m30, emTensor.m31, emTensor.m32);
                     //vector magnitude Coulomb Field
                     DirScalar[i] = DirVector[i].magnitude;
                 }
@@ -293,9 +289,9 @@ public class ComputeShaderScript : MonoBehaviour {
         Matrix4x4 K = Matrix4x4.identity;
 
         K.m00 = 0;
-        K.m03 = dA(x).m03 - dA(x).m30;
-        K.m13 = dA(x).m13 - dA(x).m31;
-        K.m23 = dA(x).m23 - dA(x).m32;
+        K.m03 = dA(x).m03 + dA(x).m30;
+        K.m13 = dA(x).m13 + dA(x).m31;
+        K.m23 = dA(x).m23 + dA(x).m32;
 
         K.m10 = dA(x).m10 - dA(x).m01;
         K.m11 = 0;
@@ -306,9 +302,9 @@ public class ComputeShaderScript : MonoBehaviour {
         K.m22 = 0;
         K.m21 = dA(x).m21 - dA(x).m12;
 
-        K.m30 = dA(x).m30 - dA(x).m03;
-        K.m31 = dA(x).m31 - dA(x).m13;
-        K.m32 = dA(x).m32 - dA(x).m23;
+        K.m30 = -dA(x).m30 - dA(x).m03;
+        K.m31 = -dA(x).m31 - dA(x).m13;
+        K.m32 = -dA(x).m32 - dA(x).m23;
         K.m33 = 0;
 
         return K;

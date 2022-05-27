@@ -57,7 +57,6 @@ public class PlayerMove : MonoBehaviour
         //defining effective chargeovermass of player by qoverm
 
         //defining unit acceleration
-        //unitAccel = 0.1f;
 
         //defining Electromagnetic tensor at player's position
         Ftensor = GaugeField(playrposworldframe4);
@@ -182,7 +181,6 @@ public class PlayerMove : MonoBehaviour
         L.m33 = u4.w;
         return L;
     }
-
     public Vector4 A(float x, float y, float z, float t)
     {
         float r = (new Vector3(x, y, z)).magnitude;
@@ -220,9 +218,9 @@ public class PlayerMove : MonoBehaviour
         Matrix4x4 K = Matrix4x4.identity;
 
         K.m00 = 0;
-        K.m03 = dA(x).m03 - dA(x).m30;
-        K.m13 = dA(x).m13 - dA(x).m31;
-        K.m23 = dA(x).m23 - dA(x).m32;
+        K.m03 = dA(x).m03 + dA(x).m30;
+        K.m13 = dA(x).m13 + dA(x).m31;
+        K.m23 = dA(x).m23 + dA(x).m32;
 
         K.m10 = dA(x).m10 - dA(x).m01;
         K.m11 = 0;
@@ -233,9 +231,9 @@ public class PlayerMove : MonoBehaviour
         K.m22 = 0;
         K.m21 = dA(x).m21 - dA(x).m12;
 
-        K.m30 = dA(x).m30 - dA(x).m03;
-        K.m31 = dA(x).m31 - dA(x).m13;
-        K.m32 = dA(x).m32 - dA(x).m23;
+        K.m30 = -dA(x).m30 - dA(x).m03;
+        K.m31 = -dA(x).m31 - dA(x).m13;
+        K.m32 = -dA(x).m32 - dA(x).m23;
         K.m33 = 0;
 
         return K;
