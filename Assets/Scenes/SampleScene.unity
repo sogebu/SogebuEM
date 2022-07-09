@@ -294,8 +294,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.26232833, y: 0.36980635, z: -0.109674156, w: 0.8845331}
-  m_LocalPosition: {x: -7.9249125, y: 5.554278, z: -8.328196}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -4.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -356,7 +356,8 @@ MonoBehaviour:
     e33: 0
   qoverm: 0
   unitAccel: 0.4
-  decceleration: 0.3
+  decceleration: 0.6
+  c: 5
 --- !u!850595691 &1248531434
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -432,6 +433,8 @@ GameObject:
   - component: {fileID: 1510263238}
   - component: {fileID: 1510263237}
   - component: {fileID: 1510263239}
+  - component: {fileID: 1510263240}
+  - component: {fileID: 1510263241}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -469,13 +472,16 @@ MonoBehaviour:
   X_GRID: 10
   Y_GRID: 10
   Z_GRID: 10
-  X_THREAD: 1000
+  X_THREAD: 1
   q1: 0
   q2: 0
   m1: 0
   m2: 0
+  particlePosition: []
+  particleVelocity: []
+  latticePosition: []
   _cs: {fileID: 7200000, guid: db47c581e06564531948a2c49ee900a4, type: 3}
-  _ParticleCount: 4000
+  _ParticleCount: 1
   _ParticleColor: {r: 0.5990566, g: 0.5990566, b: 1, a: 1}
   DebugDir: {x: 1, y: 0, z: 0}
 --- !u!114 &1510263237
@@ -528,3 +534,29 @@ MonoBehaviour:
   InstanceMesh: {fileID: 4300000, guid: 33b0feee67c1f4ce29760a80d5b7974c, type: 2}
   InstanceRenderMaterial: {fileID: 2100000, guid: 8cb8e9e49eed34855808083f892e561d,
     type: 2}
+--- !u!114 &1510263240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1510263234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93742942275df48c6b18daf17dbc7258, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  particleWorldLine:
+  - {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1510263241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1510263234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67174d09d513c467bad25693e4f4f5b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

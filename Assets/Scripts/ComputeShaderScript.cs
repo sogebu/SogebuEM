@@ -40,9 +40,9 @@ public class ComputeShaderScript : MonoBehaviour {
 
     #endregion
 
-    private Vector4[] particlePosition;
-    private Vector4[] particleVelocity;
-    private Vector4[] latticePosition;
+    public Vector4[] particlePosition;
+    public Vector4[] particleVelocity;
+    public Vector4[] latticePosition;
 
     #region ComputeShader & Buffer
     public ComputeShader _cs;
@@ -88,6 +88,7 @@ public class ComputeShaderScript : MonoBehaviour {
     {
         return new Vector3(0, 0, 0);
     }
+    //This does nothing.
     public Vector3 GetAreaSize()
     {
         return new Vector3(500f, 500f, 500f);
@@ -119,7 +120,7 @@ public class ComputeShaderScript : MonoBehaviour {
     /// <summary>
     /// 初期化
     /// </summary>
-    void Start() {
+    void Awake() {
         player = Camera.main;
         PlayerMove = player.GetComponent<PlayerMove>();
         InitializeVectorFieldComputeBuffer();
@@ -198,7 +199,6 @@ public class ComputeShaderScript : MonoBehaviour {
                     Matrix4x4 emTensor = GaugeField(latticePosition[i]);
                     //vector field non-normalised direction at each generating position
                     DirVector[i] = new Vector3(emTensor.m12, emTensor.m20, emTensor.m01);
-                    Debug.Log($"{DirVector[i]}");
                     //vector magnitude Coulomb Field
                     DirScalar[i] = DirVector[i].magnitude;
                 }
@@ -236,7 +236,8 @@ public class ComputeShaderScript : MonoBehaviour {
                 color = _ParticleColor,
                 scale = 0.02f,
                 ParticlePositionWorld4 = new Vector4(0.0f, 0.0f, 0.0f, 0.0f),
-                ParticleVelocityWorld4 = new Vector4(0.0f, 0.0f, 0.0f, 0.0f)
+                ParticleVelocityWorld4 = new Vector4(0.0f, 0.0f, 0.0f, 0.0f),
+                //ParticleWorldLine4 = new Vector4[100],
             };
             particlePosition[i] = particles[i].position;
             particlePosition[i].w = -(particles[i].position - PlayerMove.playrposworldframe3).magnitude;
@@ -245,6 +246,9 @@ public class ComputeShaderScript : MonoBehaviour {
             particleVelocity[i].w = Mathf.Sqrt(1 + particles[i].velocity.magnitude * particles[i].velocity.magnitude);
             particles[i].ParticlePositionWorld4 = particlePosition[i];
             particles[i].ParticleVelocityWorld4 = particleVelocity[i];
+            /*for (int j = 0; j < 100; j++){
+                particles[i].ParticleWorldLine4[j] = particles[i].ParticlePositionWorld4;
+            }*/
         }
 
         // keep the size of ParticleData.
@@ -255,7 +259,7 @@ public class ComputeShaderScript : MonoBehaviour {
     public Vector4 A(float x, float y, float z, float t)
     {
         float r = (new Vector3(x, y, z)).magnitude;
-        return new Vector4(0, 0, 0, 10.0f / r);
+        return new Vector4(0.0f, 0.0f, 0.0f, 4.0f * 1.0f/r);
     }
 
     public Matrix4x4 dA(Vector4 p)
@@ -317,12 +321,5 @@ public class ComputeShaderScript : MonoBehaviour {
     private float lSqN(Vector4 v) //Lorentzian squared norm
     {
         return v.x * v.x + v.y * v.y + v.z * v.z - v.w * v.w;
-    }
-
-    private float dtau(Vector4 Xp, Vector4 Xn, Vector4 Vp, Vector4 Vn)
-    {
-        float cp = lip(Vp, Vp) * Time.deltaTime * Time.deltaTime + 2 * lip(Vp, Xp - Xn) * Time.deltaTime;
-        float dtau = lip(Vn, Xn - Xp - Vp * Time.deltaTime) - Mathf.Sqrt(lip(Vn, Xn - Xp - Vp * Time.deltaTime) * lip(Vn, Xn - Xp - Vp * Time.deltaTime) - cp * lip(Vn, Vn));
-        return dtau;
     }
 }

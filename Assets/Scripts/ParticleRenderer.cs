@@ -67,13 +67,13 @@ public class ParticleRenderer : MonoBehaviour {
             (uint)InstanceMesh.GetIndexCount(0) : 0;
         args[0] = numIndices; // メッシュのインデックス数をセット
         args[1] = (uint)csScript.GetParticleNum(); // インスタンス数をセット
-        argsBuffer.SetData(args); // バッファにセット
+        argsBuffer.SetData(args); //バッファにセット
 
         // データを格納したバッファをマテリアルにセット
         InstanceRenderMaterial.SetBuffer("_ParticleDataBuffer",
             csScript.GetParticleDataBuffer());
-        // 境界領域を定義
 
+        // 境界領域を定義
         var bounds = new Bounds
         (
             csScript.GetAreaCenter(), // 中心

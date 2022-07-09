@@ -36,11 +36,14 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets/Scripts/LatticeIntersection.cs" />
      <Compile Include="Assets/Scripts/BVectorFieldRenderer.cs" />
+     <Compile Include="Assets/Scripts/RestartScene.cs" />
      <Compile Include="Assets/Scripts/Skybox.cs" />
      <Compile Include="Assets/Scripts/ParticleRenderer.cs" />
      <Compile Include="Assets/Scripts/EVectorFieldRenderer.cs" />
      <Compile Include="Assets/Scripts/ComputeShaderScript.cs" />
+     <Compile Include="Assets/Scripts/WorldLine.cs" />
      <Compile Include="Assets/Scripts/PlayerMove.cs" />
      <None Include="Assets/Shaders/BVectorRenderer.shader" />
      <None Include="Assets/Shaders/EVectorRenderer.shader" />

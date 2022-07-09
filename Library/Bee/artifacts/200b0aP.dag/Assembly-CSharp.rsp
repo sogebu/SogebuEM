@@ -300,6 +300,7 @@
 "Assets/Scripts/EVectorFieldRenderer.cs"
 "Assets/Scripts/ParticleRenderer.cs"
 "Assets/Scripts/PlayerMove.cs"
+"Assets/Scripts/RestartScene.cs"
 "Assets/Scripts/Skybox.cs"
 -langversion:9.0
 

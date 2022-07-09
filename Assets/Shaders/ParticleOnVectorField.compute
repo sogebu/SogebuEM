@@ -1,7 +1,7 @@
 ﻿#pragma kernel VectorFieldMain
 #pragma kernel ParticleMain
 
-#define NUM_THREAD_X 1000
+#define NUM_THREAD_X 1
 #define NUM_THREAD_Y 1
 #define NUM_THREAD_Z 1
 #define PI 3.14159265
@@ -33,6 +33,7 @@ RWStructuredBuffer<Particle> _ParticleDataBuffer;
 
 float _DeltaTime;
 float _FrameCount;
+float c;
 
 float4x4 Lplayer;
 float4x4 Linv;
@@ -44,7 +45,7 @@ float4 playrvelworldframe4;
 float4 A(float x, float y, float z, float t)
 {
     float r = length(float3(x, y, z));
-    return float4(0, 0, 0, 10.0 / r);
+    return float4(0.0, 0.0, 0.0, 4.0 * 1/r);
 }
 
 float4x4 dA(float4 p)
@@ -110,9 +111,9 @@ float lSqN(float4 v)
 
 float dtau(float4 Xp, float4 Xn, float4 Vp, float4 Vn)
 {
-   float cp = lip(Vp, Vp) * _DeltaTime * _DeltaTime + 2 * lip(Vp, Xp - Xn) * _DeltaTime;
-   float dtau = lip(Vn, Xn - Xp - Vp * _DeltaTime) - sqrt(lip(Vn, Xn - Xp - Vp * _DeltaTime) * lip(Vn, Xn - Xp - Vp * _DeltaTime) - cp * lip(Vn, Vn));
-   return dtau;          
+   float cp = -1.0 * c * c * _DeltaTime * _DeltaTime - 2 * lip(Vp, Xn - Xp) * _DeltaTime * c;
+   float dtau = lip(Vn, Xn - Xp - Vp * _DeltaTime * c) - sqrt(lip(Vn, Xn - Xp - Vp * _DeltaTime * c) * lip(Vn, Xn - Xp - Vp * _DeltaTime * c) + cp);
+   return dtau;
 }
 
 [numthreads(NUM_THREAD_X, 1, 1)]
@@ -126,13 +127,11 @@ void VectorFieldMain (
     uint bufferIndex = id.x;
     VectorField Evf = _EVectorFieldDataBuffer[bufferIndex];
     VectorField Bvf = _BVectorFieldDataBuffer[bufferIndex];
-    
-    //float3 noiseSeed = Evf.position * 0.05;
-    //float fc = _FrameCount * 0.04;
-    //Evf.direction = Pnoise(noiseSeed * fc);
+
     float4x4 F = mul(mul(Lplayer, Evf.ftensor), Lplayer);
     float4 lpos = Evf.latticeposition;
     lpos.w += dtau(playrposworldframe4, lpos, playrvelworldframe4, float4(0.0, 0.0, 0.0, 1.0));
+    lpos.w = playrposworldframe4.w - length(playrposworldframe4.xyz - lpos.xyz);
     float4 lposrestframe = mul(Lplayer, lpos);
     Evf.position = lposrestframe.xyz;
     Bvf.position = lposrestframe.xyz;
@@ -149,13 +148,18 @@ void ParticleMain (uint3 id : SV_DispatchThreadID)
 {
     int index = id.x;
     Particle p = _ParticleDataBuffer[index];
-    //Electromagnetic Tensor Component for particles
+    /*
+    //Acceleration
     p.ParticlePositionWorld4.w += dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
     float4x4 F = GaugeField(p.ParticlePositionWorld4);
     float4x4 metrictensor = float4x4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0);
     p.ParticleVelocityWorld4 += 0.01 * mul(F, mul(metrictensor, p.ParticleVelocityWorld4)) * dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
+    p.ParticleVelocityWorld4.w = sqrt(1 + length(p.ParticleVelocityWorld4.xyz) * length(p.ParticleVelocityWorld4.xyz));
     p.ParticlePositionWorld4 += p.ParticleVelocityWorld4 * dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);//position
+    //Particle should be on player's PLC
+    p.ParticlePositionWorld4.w = playrposworldframe4.w - length(playrposworldframe4.xyz - p.ParticlePositionWorld4.xyz);
     float4 positionrestframe = mul(Lplayer, p.ParticlePositionWorld4);
     p.position = positionrestframe.xyz;
+    */
     _ParticleDataBuffer[index] = p;
-}            
+}

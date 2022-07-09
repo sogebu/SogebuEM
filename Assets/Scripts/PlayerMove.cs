@@ -21,6 +21,8 @@ public class PlayerMove : MonoBehaviour
     public float qoverm;
     public float unitAccel;
     public float decceleration;
+
+    public float c;
     //ArrowDirection2 ArrowDirection2;
     //GeneralRelmetric GeneralRelmetric;
 
@@ -30,7 +32,6 @@ public class PlayerMove : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log($"norm = {(new Vector3(0.0f, 0.0f, 0.0f)).normalized}");
         //importing ArrowDirection for Electromagnetic Effects
         //ArrowDirection2 = emfields.GetComponent<ArrowDirection2>();
         //GeneralRelmetric = metric.GetComponent<GeneralRelmetric>();
@@ -118,7 +119,7 @@ public class PlayerMove : MonoBehaviour
         playraccelworldframe3 = playraccelworldframe4;
 
         //
-        playrvelworldframe3 += playraccelworldframe3 * Time.deltaTime;
+        playrvelworldframe3 += playraccelworldframe3 * c * Time.deltaTime;
 
         //
         playrvelworldframe4 = playrvelworldframe3;
@@ -130,7 +131,7 @@ public class PlayerMove : MonoBehaviour
         LplayerInverse = LTrans(-1.0f * playrvelworldframe3);
 
         //
-        playrposworldframe4 += playrvelworldframe4 * Time.deltaTime;
+        playrposworldframe4 += playrvelworldframe4 * c * Time.deltaTime;
         playrposworldframe3 = playrposworldframe4;
 
         this.transform.position = Lplayer * playrposworldframe4;
@@ -138,6 +139,7 @@ public class PlayerMove : MonoBehaviour
         Shader.SetGlobalMatrix("Linv", LplayerInverse);
         Shader.SetGlobalVector("playrposworldframe4", playrposworldframe4);
         Shader.SetGlobalVector("playrvelworldframe4", playrvelworldframe4);
+        Shader.SetGlobalFloat("c", c);
     }
 
     public Vector3 vp(Vector3 v1, Vector3 v2) //calculate vectorproduct
@@ -146,7 +148,7 @@ public class PlayerMove : MonoBehaviour
         return new Vector3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
     }
 
-    public Vector4 cont(Matrix4x4 m1, Vector4 v1)　//contraction between rank2 tensor and vector
+    public Vector4 cont(Matrix4x4 m1, Vector4 v1) //contraction between rank2 tensor and vector
     {
         return new Vector4(m1.m00 * v1.x + m1.m01 * v1.y + m1.m02 * v1.z + m1.m03 * v1.w, m1.m10 * v1.x + m1.m11 * v1.y + m1.m12 * v1.z + m1.m13 * v1.w, m1.m20 * v1.x + m1.m21 * v1.y + m1.m22 * v1.z + m1.m23 * v1.w, 0);
     }
@@ -184,7 +186,7 @@ public class PlayerMove : MonoBehaviour
     public Vector4 A(float x, float y, float z, float t)
     {
         float r = (new Vector3(x, y, z)).magnitude;
-        return new Vector4(0, 0, 0, 10.0f / r);
+        return new Vector4(0.0f, 0.0f, 0.0f, 4.0f * 1.0f/r);
     }
 
     public Matrix4x4 dA(Vector4 p)
@@ -246,12 +248,5 @@ public class PlayerMove : MonoBehaviour
     private float lSqN(Vector4 v) //Lorentzian squared norm
     {
         return v.x * v.x + v.y * v.y + v.z * v.z - v.w * v.w;
-    }
-
-    private float dtau(Vector4 Xp, Vector4 Xn, Vector4 Vp, Vector4 Vn)
-    {
-        float cp = lip(Vp, Vp) * Time.deltaTime * Time.deltaTime + 2 * lip(Vp, Xp - Xn) * Time.deltaTime;
-        float dtau = lip(Vn, Xn - Xp - Vp * Time.deltaTime) - Mathf.Sqrt(lip(Vn, Xn - Xp - Vp * Time.deltaTime) * lip(Vn, Xn - Xp - Vp * Time.deltaTime) - cp * lip(Vn, Vn));
-        return dtau;
     }
 }
