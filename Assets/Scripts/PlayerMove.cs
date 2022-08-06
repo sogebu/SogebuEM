@@ -123,7 +123,7 @@ public class PlayerMove : MonoBehaviour
 
         //
         playrvelworldframe4 = playrvelworldframe3;
-        playrvelworldframe4.w = Mathf.Sqrt(1f + playrvelworldframe3.sqrMagnitude);
+        playrvelworldframe4.w = Mathf.Sqrt(1f + (playrvelworldframe3.sqrMagnitude));
 
         //updating player's Lorentz transformation
         //Lplayer has upper and lower indices: (0,1,2,3) is (x,y,z,w), where w is t.

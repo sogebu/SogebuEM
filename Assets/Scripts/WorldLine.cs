@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class WorldLine : MonoBehaviour
 {
-    private Vector4 ParticlePosWorld4;
-    private Vector4 ParticleVelWorld4;
+    public Vector4 ParticlePosWorld4;
+    public Vector4 ParticleVelWorld4;
     private Vector4 playrposworldframe4;
     private Vector4 playrvelworldframe4;
     Camera cam;
@@ -13,6 +13,8 @@ public class WorldLine : MonoBehaviour
     PlayerMove PlayerMove;
 
     private float c;
+    private int j = 100;
+    public float qparticle;
     private Matrix4x4 metrictensor = Matrix4x4.identity;
     public List<Vector4> particleWorldLine;
     //public List<Vector4> vector4s = new List<Vector4>() { new Vector2(1, 0), new Vector3(2, 9), new Vector3(5, 7,10) };
@@ -30,35 +32,46 @@ public class WorldLine : MonoBehaviour
         playrvelworldframe4 = PlayerMove.playrvelworldframe4;
 
         metrictensor.m33 = -1.0f;
-        for(int i = 0; i < 100; i++){
+        for(int i = 0; i < 600; i++){
             float fi = (float)i;
-            particleWorldLine.Add(ParticlePosWorld4 - (100.0f - (float)fi) * c * Time.deltaTime * new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+            particleWorldLine.Add(ParticlePosWorld4 - (600.0f - fi) * c * 1/60.0f * new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+            //Debug.Log($"particleWorldLine[{i}] = {particleWorldLine[i]}");
         }
-        particleWorldLine = new List<Vector4>() {new Vector4()};
         particleWorldLine.Add(ParticlePosWorld4);
     }
 
     // Update is called once per frame
     void Update()
     {
-        ParticlePosWorld4.w += dtau(playrposworldframe4, ParticlePosWorld4, playrvelworldframe4, ParticleVelWorld4);
+        float X = (new Vector3(PlayerMove.playrposworldframe4.x - ParticlePosWorld4.x, PlayerMove.playrposworldframe4.y - ParticlePosWorld4.y, PlayerMove.playrposworldframe4.z - ParticlePosWorld4.z)).magnitude;
+        //Debug.Log($"X = {X}");
+        //Particle should be on player's PLC
+        //Debug.Log($"playrposworldframe4.w = {PlayerMove.playrposworldframe4.w}");
+        ParticlePosWorld4.w = PlayerMove.playrposworldframe4.w - X;
+        //Debug.Log($"ParticlePosWorld4 = {ParticlePosWorld4}");
+        //ParticlePosWorld4.w += dtau(playrposworldframe4, ParticlePosWorld4, playrvelworldframe4, ParticleVelWorld4);
+        //Debug.Log($"dtau(playrposworldframe4, ParticlePosWorld4, playrvelworldframe4, ParticleVelWorld4) = {dtau(playrposworldframe4, ParticlePosWorld4, playrvelworldframe4, ParticleVelWorld4)}");
         Matrix4x4 F = GaugeField(ParticlePosWorld4);
-        Vector4 A = F * metrictensor * ParticleVelWorld4;
-        A *= 0.01f * dtau(playrposworldframe4, ParticlePosWorld4, playrvelworldframe4, ParticleVelWorld4);
+        //Vector4 A = F * metrictensor * ParticleVelWorld4;
+        //A *= qparticle;
+        float K = 2.0f;
+        Vector4 A = -K * ParticlePosWorld4;
+        A.w = 0.0f;
+        A *= dtau(PlayerMove.playrposworldframe4, ParticlePosWorld4, PlayerMove.playrvelworldframe4, ParticleVelWorld4);
         ParticleVelWorld4 += A;
         float V = (new Vector3(ParticleVelWorld4.x, ParticleVelWorld4.y, ParticleVelWorld4.z)).magnitude;
         ParticleVelWorld4.w = Mathf.Sqrt(1 + V * V);
-        ParticlePosWorld4 += ParticleVelWorld4 * dtau(playrposworldframe4, ParticlePosWorld4, playrvelworldframe4, ParticleVelWorld4);//position
-        float X = (new Vector3(playrposworldframe4.x - ParticlePosWorld4.x, playrposworldframe4.y - ParticlePosWorld4.y, playrposworldframe4.z - ParticlePosWorld4.z)).magnitude;
-        //Particle should be on player's PLC
-        ParticlePosWorld4.w = playrposworldframe4.w - X;
+        ParticlePosWorld4 += ParticleVelWorld4 * dtau(PlayerMove.playrposworldframe4, ParticlePosWorld4, PlayerMove.playrvelworldframe4, ParticleVelWorld4);//position
+        Debug.Log($"ParticlePosWorld4 = {ParticlePosWorld4}");
         particleWorldLine.Add(ParticlePosWorld4);
+        //Debug.Log($"particleWorldLine[{j}] = {particleWorldLine[j]}");
+        //j += 1;
     }
 
     private Vector4 A(float x, float y, float z, float t)
     {
         float r = (new Vector3(x, y, z)).magnitude;
-        return new Vector4(0.0f, 0.0f, 0.0f, 4.0f * 1.0f/r);
+        return new Vector4(0.0f, 0.0f, 0.0f, 4.0f * 1.0f/r * c);
     }
 
     private Matrix4x4 dA(Vector4 p)
