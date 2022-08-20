@@ -91,10 +91,10 @@ public class LatticeIntersection : MonoBehaviour
             latticeAvector[i] = wL.qparticle * ((1/(particleLatticeDist).magnitude)/interSectionVelocity[i].w) * interSectionVelocity[i];
             diffLatticeAvector[i] = lienardWiechert(LatticePosWorld4[i], interSection[i], interSectionVelocity[i], interSectionAcceleration[i]);
             //Debug.Log($"particleLatticeDist = {particleLatticeDist}, interSection[{i}] = {interSection[i]}, interSectionVelocity[{i}] = {interSectionVelocity[i]}, interSectionAcceleration[{i}] = {interSectionAcceleration[i]}, latticeAvector[{i}] = {latticeAvector[i]}");
-            //Debug.Log($"diffLatticeAvector[{i}] = {diffLatticeAvector[i]}");
+            Debug.Log($"diffLatticeAvector[{i}] = {diffLatticeAvector[i]}");
         }
         int j = Shader.PropertyToID("f");
-        cs.SetMatrixArray(j, diffLatticeAvector);
+        cs.SetMatrixArray("f", diffLatticeAvector);
     }
     private float lSqN(Vector4 v) //Lorentzian squared norm
     {
@@ -142,25 +142,25 @@ public class LatticeIntersection : MonoBehaviour
         dA.m33 = termOne.w * particleAcceleration.w - (termTwo - termThree).w * particleVelocity.w;
         */
         
-        dA.m00 = -wL.qparticle / (R.w * R.w * R.w) * R.x * particleVelocity.x + 2/(R.w * R.w * R.w) * R.x * particleVelocity.x - 1/(R.w * R.w) * R.x * particleAcceleration.x;
-        dA.m01 = -wL.qparticle / (R.w * R.w * R.w) * R.y * particleVelocity.x + 2/(R.w * R.w * R.w) * R.y * particleVelocity.x - 1/(R.w * R.w) * R.y * particleAcceleration.x;
-        dA.m02 = -wL.qparticle / (R.w * R.w * R.w) * R.z * particleVelocity.x + 2/(R.w * R.w * R.w) * R.z * particleVelocity.x - 1/(R.w * R.w) * R.z * particleAcceleration.x;
-        dA.m03 = -wL.qparticle / (R.w * R.w * R.w) * R.w * particleVelocity.x + 2/(R.w * R.w * R.w) * R.w * particleVelocity.x - 1/(R.w * R.w) * R.w * particleAcceleration.x;
+        dA.m00 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.x * particleVelocity.x - 2/(R.w * R.w * R.w) * R.x * particleVelocity.x + 1/(R.w * R.w) * R.x * particleAcceleration.x);
+        dA.m01 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.x * particleVelocity.y - 2/(R.w * R.w * R.w) * R.x * particleVelocity.y + 1/(R.w * R.w) * R.x * particleAcceleration.y);
+        dA.m02 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.x * particleVelocity.z - 2/(R.w * R.w * R.w) * R.x * particleVelocity.z + 1/(R.w * R.w) * R.x * particleAcceleration.z);
+        dA.m03 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.x * particleVelocity.w - 2/(R.w * R.w * R.w) * R.x * particleVelocity.w + 1/(R.w * R.w) * R.x * particleAcceleration.w);
 
-        dA.m10 = -wL.qparticle / (R.w * R.w * R.w) * R.x * particleVelocity.y + 2/(R.w * R.w * R.w) * R.x * particleVelocity.y - 1/(R.w * R.w) * R.x * particleAcceleration.y;
-        dA.m11 = -wL.qparticle / (R.w * R.w * R.w) * R.y * particleVelocity.y + 2/(R.w * R.w * R.w) * R.y * particleVelocity.y - 1/(R.w * R.w) * R.y * particleAcceleration.y;
-        dA.m12 = -wL.qparticle / (R.w * R.w * R.w) * R.z * particleVelocity.y + 2/(R.w * R.w * R.w) * R.z * particleVelocity.y - 1/(R.w * R.w) * R.z * particleAcceleration.y;
-        dA.m13 = -wL.qparticle / (R.w * R.w * R.w) * R.w * particleVelocity.y + 2/(R.w * R.w * R.w) * R.w * particleVelocity.y - 1/(R.w * R.w) * R.w * particleAcceleration.y;
+        dA.m10 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.y * particleVelocity.x - 2/(R.w * R.w * R.w) * R.y * particleVelocity.x + 1/(R.w * R.w) * R.y * particleAcceleration.x);
+        dA.m11 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.y * particleVelocity.y - 2/(R.w * R.w * R.w) * R.y * particleVelocity.y + 1/(R.w * R.w) * R.y * particleAcceleration.y);
+        dA.m12 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.y * particleVelocity.z - 2/(R.w * R.w * R.w) * R.y * particleVelocity.z + 1/(R.w * R.w) * R.y * particleAcceleration.z);
+        dA.m13 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.y * particleVelocity.w - 2/(R.w * R.w * R.w) * R.y * particleVelocity.w + 1/(R.w * R.w) * R.y * particleAcceleration.w);
 
-        dA.m20 = -wL.qparticle / (R.w * R.w * R.w) * R.x * particleVelocity.z + 2/(R.w * R.w * R.w) * R.x * particleVelocity.z - 1/(R.w * R.w) * R.x * particleAcceleration.z;
-        dA.m21 = -wL.qparticle / (R.w * R.w * R.w) * R.y * particleVelocity.z + 2/(R.w * R.w * R.w) * R.y * particleVelocity.z - 1/(R.w * R.w) * R.y * particleAcceleration.z;
-        dA.m22 = -wL.qparticle / (R.w * R.w * R.w) * R.z * particleVelocity.z + 2/(R.w * R.w * R.w) * R.z * particleVelocity.z - 1/(R.w * R.w) * R.z * particleAcceleration.z;
-        dA.m23 = -wL.qparticle / (R.w * R.w * R.w) * R.w * particleVelocity.z + 2/(R.w * R.w * R.w) * R.w * particleVelocity.z - 1/(R.w * R.w) * R.w * particleAcceleration.z;
+        dA.m20 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.z * particleVelocity.x - 2/(R.w * R.w * R.w) * R.z * particleVelocity.x + 1/(R.w * R.w) * R.z * particleAcceleration.x);
+        dA.m21 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.z * particleVelocity.y - 2/(R.w * R.w * R.w) * R.z * particleVelocity.y + 1/(R.w * R.w) * R.z * particleAcceleration.y);
+        dA.m22 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.z * particleVelocity.z - 2/(R.w * R.w * R.w) * R.z * particleVelocity.z + 1/(R.w * R.w) * R.z * particleAcceleration.z);
+        dA.m23 = -wL.qparticle * (1 / (R.w * R.w * R.w) * R.z * particleVelocity.w - 2/(R.w * R.w * R.w) * R.z * particleVelocity.w + 1/(R.w * R.w) * R.z * particleAcceleration.w);
 
-        dA.m30 = wL.qparticle / (R.w * R.w) * particleVelocity.x - 1/(R.w) * particleAcceleration.x;
-        dA.m31 = wL.qparticle / (R.w * R.w) * particleVelocity.y - 1/(R.w) * particleAcceleration.y;
-        dA.m32 = wL.qparticle / (R.w * R.w) * particleVelocity.z - 1/(R.w) * particleAcceleration.z;
-        dA.m33 = wL.qparticle / (R.w * R.w) * particleVelocity.w - 1/(R.w) * particleAcceleration.w;
+        dA.m30 = wL.qparticle  * (1/ (R.w * R.w) * particleVelocity.x - 1/(R.w) * particleAcceleration.x);
+        dA.m31 = wL.qparticle  * (1/ (R.w * R.w) * particleVelocity.y - 1/(R.w) * particleAcceleration.y);
+        dA.m32 = wL.qparticle  * (1/ (R.w * R.w) * particleVelocity.z - 1/(R.w) * particleAcceleration.z);
+        dA.m33 = wL.qparticle  * (1/ (R.w * R.w) * particleVelocity.w - 1/(R.w) * particleAcceleration.w);
         
         Matrix4x4 F;
         F.m00 = 0.0f;

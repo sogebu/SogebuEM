@@ -62,7 +62,7 @@ public class WorldLine : MonoBehaviour
         float V = (new Vector3(ParticleVelWorld4.x, ParticleVelWorld4.y, ParticleVelWorld4.z)).magnitude;
         ParticleVelWorld4.w = Mathf.Sqrt(1 + V * V);
         ParticlePosWorld4 += ParticleVelWorld4 * dtau(PlayerMove.playrposworldframe4, ParticlePosWorld4, PlayerMove.playrvelworldframe4, ParticleVelWorld4);//position
-        Debug.Log($"ParticlePosWorld4 = {ParticlePosWorld4}");
+        //Debug.Log($"ParticlePosWorld4 = {ParticlePosWorld4}");
         particleWorldLine.Add(ParticlePosWorld4);
         //Debug.Log($"particleWorldLine[{j}] = {particleWorldLine[j]}");
         //j += 1;
