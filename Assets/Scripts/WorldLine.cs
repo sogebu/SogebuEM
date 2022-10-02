@@ -54,8 +54,8 @@ public class WorldLine : MonoBehaviour
         Matrix4x4 F = GaugeField(ParticlePosWorld4);
         //Vector4 A = F * metrictensor * ParticleVelWorld4;
         //A *= qparticle;
-        float K = 2.0f;
-        Vector4 A = -K * ParticlePosWorld4;
+        float K = 20.0f;
+        Vector4 A = -K/c * ParticlePosWorld4;
         A.w = 0.0f;
         A *= dtau(PlayerMove.playrposworldframe4, ParticlePosWorld4, PlayerMove.playrvelworldframe4, ParticleVelWorld4);
         ParticleVelWorld4 += A;

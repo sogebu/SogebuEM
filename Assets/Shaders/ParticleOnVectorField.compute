@@ -47,7 +47,7 @@ float4x4 f[NUM_THREAD_X];
 float4 A(float x, float y, float z, float t)
 {
     float r = length(float3(x, y, z));
-    return float4(0.0, 0.0, 0.0, 4.0 * 1/r);
+    return float4(0.0, 0.0, 0.0, 100.0 * 1/r);
 }
 
 float4x4 dA(float4 p)
@@ -130,7 +130,7 @@ void VectorFieldMain (
     VectorField Evf = _EVectorFieldDataBuffer[bufferIndex];
     VectorField Bvf = _BVectorFieldDataBuffer[bufferIndex];
 
-    float4x4 F = mul(f[bufferIndex], Lplayer);
+    float4x4 F = mul(Evf.ftensor, Lplayer);
     F = mul(Lplayer, F);
     float4 lpos = Evf.latticeposition;
     //lpos.w += dtau(playrposworldframe4, lpos, playrvelworldframe4, float4(0.0, 0.0, 0.0, 1.0));

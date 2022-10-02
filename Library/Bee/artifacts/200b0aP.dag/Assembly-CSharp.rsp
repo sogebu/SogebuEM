@@ -298,10 +298,12 @@
 "Assets/Scripts/BVectorFieldRenderer.cs"
 "Assets/Scripts/ComputeShaderScript.cs"
 "Assets/Scripts/EVectorFieldRenderer.cs"
+"Assets/Scripts/LatticeIntersection.cs"
 "Assets/Scripts/ParticleRenderer.cs"
 "Assets/Scripts/PlayerMove.cs"
 "Assets/Scripts/RestartScene.cs"
 "Assets/Scripts/Skybox.cs"
+"Assets/Scripts/WorldLine.cs"
 -langversion:9.0
 
 /deterministic

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -21,6 +22,24 @@ public class PlayerMove : MonoBehaviour
     public float qoverm;
     public float unitAccel;
     public float decceleration;
+
+
+    public bool CanMove = true;
+	public bool CanMoveForward = true;
+	public bool CanMoveBack = true;
+	public bool CanMoveLeft = true;
+	public bool CanMoveRight = true;
+	public bool CanMoveUp = true;
+	public bool CanMoveDown = true;
+	public bool CanRotateYaw = true;
+	public bool CanRotatePitch = true;
+	public bool CanRotateRoll = true;
+
+    public float MovementSpeed = 100f;
+	public float RotationSpeed = 100f;
+
+	private bool canTranslate;
+	private bool canRotate;
 
     public float c;
     //ArrowDirection2 ArrowDirection2;
@@ -67,13 +86,51 @@ public class PlayerMove : MonoBehaviour
         Shader.SetGlobalVector("playrposworldframe4", playrposworldframe4);
         Shader.SetGlobalVector("playrvelworldframe4", playrvelworldframe4);
         this.transform.position = Lplayer * playrposworldframe4;
+
+        canRotate = CanMoveForward || CanMoveBack || CanMoveRight || CanMoveLeft || CanMoveUp || CanMoveDown;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        if( Input.GetKey( KeyCode.G )) {
+				SceneManager.LoadScene (SceneManager.GetActiveScene().name);
+		}
+        if(Input.GetKey(KeyCode.Escape)){
+            Application.Quit();
+        }
         //defining Electromagnetic tensor at player's position
         Ftensor = GaugeField(playrposworldframe4);
+
+        if( canRotate ) {
+			Quaternion AddRot = Quaternion.identity;
+			float yawplus = 0;
+            float yawminus = 0;
+			float pitchplus = 0;
+			float pitchminus = 0;
+			float rollplus = 0;
+            float rollminus = 0;
+			if( Input.GetKey( KeyCode.E )) {
+				yawplus = ( Time.fixedDeltaTime * RotationSpeed );
+			}
+            if( Input.GetKey( KeyCode.W )) {
+				yawminus = ( Time.fixedDeltaTime * RotationSpeed );
+			}
+			if( Input.GetKey( KeyCode.F )){
+				pitchplus = ( Time.fixedDeltaTime * RotationSpeed );
+			}
+            if( Input.GetKey( KeyCode.D )){
+				pitchminus = ( Time.fixedDeltaTime * RotationSpeed );
+			}
+			if( Input.GetKey( KeyCode.S )){
+				rollplus = ( Time.fixedDeltaTime * RotationSpeed );
+			}
+            if( Input.GetKey( KeyCode.A )){
+				rollminus = ( Time.fixedDeltaTime * RotationSpeed );
+			}
+			AddRot.eulerAngles = new Vector3( pitchminus-pitchplus, yawplus - yawminus, rollminus-rollplus );
+			this.transform.rotation *= AddRot;
+		}
 
         //Defining Rotation Matrix by using Quartanion
         Quaternion q = transform.rotation.normalized;
@@ -86,8 +143,6 @@ public class PlayerMove : MonoBehaviour
         R.m20 = 2 * (q.x * q.z - q.y * q.w);
         R.m21 = 2 * (q.y * q.z + q.x * q.w);
         R.m22 = -q.x * q.x - q.y * q.y + q.z * q.z + q.w * q.w;
-
-
 
         //player can input arbitrary acceleration for every update
         if (Input.GetKey(KeyCode.RightArrow))

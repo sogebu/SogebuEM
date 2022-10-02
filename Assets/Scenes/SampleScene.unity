@@ -354,9 +354,21 @@ MonoBehaviour:
     e31: 0
     e32: 0
     e33: 0
-  qoverm: 0
-  unitAccel: 0.1
+  qoverm: 0.1
+  unitAccel: 1
   decceleration: 0.1
+  CanMove: 1
+  CanMoveForward: 1
+  CanMoveBack: 1
+  CanMoveLeft: 1
+  CanMoveRight: 1
+  CanMoveUp: 1
+  CanMoveDown: 1
+  CanRotateYaw: 1
+  CanRotatePitch: 1
+  CanRotateRoll: 1
+  MovementSpeed: 100
+  RotationSpeed: 100
   c: 1
 --- !u!850595691 &1248531434
 LightingSettings:
@@ -496,9 +508,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9549e471ac5424dd6968eca2be2d7e22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ObjectScale: {x: 0.1, y: 1, z: 0.1}
+  ObjectScale: {x: 300, y: 300, z: 300}
   csScript: {fileID: 1510263236}
-  InstanceMesh: {fileID: 4300000, guid: 33b0feee67c1f4ce29760a80d5b7974c, type: 2}
+  InstanceMesh: {fileID: 4300000, guid: 1aaa39cd6c80745a49b9099597969d07, type: 2}
   InstanceRenderMaterial: {fileID: 2100000, guid: 18f4d230459e246dc87df41a7b2646a2,
     type: 2}
 --- !u!114 &1510263238
@@ -508,7 +520,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1510263234}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 73c0d9b5f136446fabfad74592554193, type: 3}
   m_Name: 
@@ -529,9 +541,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e273c8a33df144a4919c371a2eb8b48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BObjectScale: {x: 0.2, y: 1.5, z: 0.2}
+  BObjectScale: {x: 300, y: 300, z: 300}
   csScript: {fileID: 1510263236}
-  InstanceMesh: {fileID: 4300000, guid: 33b0feee67c1f4ce29760a80d5b7974c, type: 2}
+  InstanceMesh: {fileID: 4300000, guid: 1aaa39cd6c80745a49b9099597969d07, type: 2}
   InstanceRenderMaterial: {fileID: 2100000, guid: 8cb8e9e49eed34855808083f892e561d,
     type: 2}
 --- !u!114 &1510263240
