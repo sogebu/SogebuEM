@@ -34,6 +34,7 @@ RWStructuredBuffer<Particle> _ParticleDataBuffer;
 float _DeltaTime;
 float _FrameCount;
 float c;
+float Const;
 
 float4x4 Lplayer;
 float4x4 Linv;
@@ -41,7 +42,7 @@ float4x4 R;
 float4 playrposworldframe4;
 float4 playrvelworldframe4;
 
-float4x4 f[NUM_THREAD_X];
+float4x4 f[125];
 
 //A has upper index: (0,1,2,3) is (x,y,z,w), where w is t.
 float4 A(float x, float y, float z, float t)
@@ -130,7 +131,7 @@ void VectorFieldMain (
     VectorField Evf = _EVectorFieldDataBuffer[bufferIndex];
     VectorField Bvf = _BVectorFieldDataBuffer[bufferIndex];
 
-    float4x4 F = mul(Evf.ftensor, Lplayer);
+    float4x4 F = mul(f[id.x], Lplayer);
     F = mul(Lplayer, F);
     float4 lpos = Evf.latticeposition;
     //lpos.w += dtau(playrposworldframe4, lpos, playrvelworldframe4, float4(0.0, 0.0, 0.0, 1.0));
@@ -153,13 +154,12 @@ void ParticleMain (uint3 id : SV_DispatchThreadID)
     int index = id.x;
     Particle p = _ParticleDataBuffer[index];
     //Acceleration
-    /*p.ParticlePositionWorld4.w += dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
-    float4x4 F = GaugeField(p.ParticlePositionWorld4);
-    float4x4 metrictensor = float4x4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0);
-    p.ParticleVelocityWorld4 += 0.01 * mul(F, mul(metrictensor, p.ParticleVelocityWorld4)) * dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
-    */
-    float K = 20.0;
-    float4 A = -K/c * p.ParticlePositionWorld4;
+    //p.ParticlePositionWorld4.w += dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
+    //float4x4 F = GaugeField(p.ParticlePositionWorld4);
+    //float4x4 metrictensor = float4x4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0);
+    //float4 A = 4.0 * mul(F, mul(metrictensor, p.ParticleVelocityWorld4));
+    
+    float4 A = -Const/c * p.ParticlePositionWorld4;
     A.w = 0.0;
     A *= dtau(playrposworldframe4, p.ParticlePositionWorld4, playrvelworldframe4, p.ParticleVelocityWorld4);
     p.ParticleVelocityWorld4 += A;

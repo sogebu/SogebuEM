@@ -237,7 +237,7 @@ public class ComputeShaderScript : MonoBehaviour {
                 color = _ParticleColor,
                 scale = 0.02f,
                 ParticlePositionWorld4 = new Vector4(0.0f, 0.0f, 0.0f, 0.0f),
-                ParticleVelocityWorld4 = new Vector4(0.0f, 0.0f, 0.0f, 0.0f),
+                ParticleVelocityWorld4 = new Vector4(0.0f, 0.0f, 0.0f, 1.0f),
                 //ParticleWorldLine4 = new Vector4[100],
             };
             particlePosition[i] = particles[i].position;
@@ -260,7 +260,7 @@ public class ComputeShaderScript : MonoBehaviour {
     public Vector4 A(float x, float y, float z, float t)
     {
         float r = (new Vector3(x, y, z)).magnitude;
-        return new Vector4(0.0f, 0.0f, 0.0f, 4.0f * 1.0f/r * PlayerMove.c);
+        return new Vector4(0.0f, 0.0f, 0.0f, 100.0f * 1.0f/r * PlayerMove.c);
     }
 
     public Matrix4x4 dA(Vector4 p)

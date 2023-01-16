@@ -354,7 +354,7 @@ MonoBehaviour:
     e31: 0
     e32: 0
     e33: 0
-  qoverm: 0.1
+  qoverm: 0
   unitAccel: 1
   decceleration: 0.1
   CanMove: 1
@@ -520,7 +520,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1510263234}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 73c0d9b5f136446fabfad74592554193, type: 3}
   m_Name: 
@@ -560,9 +560,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ParticlePosWorld4: {x: 0, y: 0, z: 0, w: 0}
   ParticleVelWorld4: {x: 0, y: 0, z: 0, w: 0}
-  qparticle: 4
+  Const: 0
+  _cs: {fileID: 7200000, guid: db47c581e06564531948a2c49ee900a4, type: 3}
+  qparticle: 1000
   particleWorldLine:
   - {x: 0, y: 0, z: 0, w: 0}
+  particleVelWorldLine: []
 --- !u!114 &1510263241
 MonoBehaviour:
   m_ObjectHideFlags: 0

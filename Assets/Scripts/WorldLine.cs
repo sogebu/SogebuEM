@@ -11,12 +11,16 @@ public class WorldLine : MonoBehaviour
     Camera cam;
     ComputeShaderScript cSS;
     PlayerMove PlayerMove;
+    public float Const;
+
+    public ComputeShader _cs;
 
     private float c;
     private int j = 100;
     public float qparticle;
     private Matrix4x4 metrictensor = Matrix4x4.identity;
     public List<Vector4> particleWorldLine;
+    public List<Vector4> particleVelWorldLine;
     //public List<Vector4> vector4s = new List<Vector4>() { new Vector2(1, 0), new Vector3(2, 9), new Vector3(5, 7,10) };
     // Start is called before the first frame update
     void Start()
@@ -35,9 +39,11 @@ public class WorldLine : MonoBehaviour
         for(int i = 0; i < 600; i++){
             float fi = (float)i;
             particleWorldLine.Add(ParticlePosWorld4 - (600.0f - fi) * c * 1/60.0f * new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-            //Debug.Log($"particleWorldLine[{i}] = {particleWorldLine[i]}");
+            particleVelWorldLine.Add(new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
         }
         particleWorldLine.Add(ParticlePosWorld4);
+        particleVelWorldLine.Add(ParticleVelWorld4);
+        _cs.SetFloat("Const", Const);
     }
 
     // Update is called once per frame
@@ -51,11 +57,10 @@ public class WorldLine : MonoBehaviour
         //Debug.Log($"ParticlePosWorld4 = {ParticlePosWorld4}");
         //ParticlePosWorld4.w += dtau(playrposworldframe4, ParticlePosWorld4, playrvelworldframe4, ParticleVelWorld4);
         //Debug.Log($"dtau(playrposworldframe4, ParticlePosWorld4, playrvelworldframe4, ParticleVelWorld4) = {dtau(playrposworldframe4, ParticlePosWorld4, playrvelworldframe4, ParticleVelWorld4)}");
-        Matrix4x4 F = GaugeField(ParticlePosWorld4);
+        //Matrix4x4 F = GaugeField(ParticlePosWorld4);
         //Vector4 A = F * metrictensor * ParticleVelWorld4;
         //A *= qparticle;
-        float K = 20.0f;
-        Vector4 A = -K/c * ParticlePosWorld4;
+        Vector4 A = -Const/c * ParticlePosWorld4;
         A.w = 0.0f;
         A *= dtau(PlayerMove.playrposworldframe4, ParticlePosWorld4, PlayerMove.playrvelworldframe4, ParticleVelWorld4);
         ParticleVelWorld4 += A;
@@ -64,6 +69,7 @@ public class WorldLine : MonoBehaviour
         ParticlePosWorld4 += ParticleVelWorld4 * dtau(PlayerMove.playrposworldframe4, ParticlePosWorld4, PlayerMove.playrvelworldframe4, ParticleVelWorld4);//position
         //Debug.Log($"ParticlePosWorld4 = {ParticlePosWorld4}");
         particleWorldLine.Add(ParticlePosWorld4);
+        particleVelWorldLine.Add(ParticleVelWorld4);
         //Debug.Log($"particleWorldLine[{j}] = {particleWorldLine[j]}");
         //j += 1;
     }

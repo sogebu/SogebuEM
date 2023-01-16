@@ -85,16 +85,18 @@ public class LatticeIntersection : MonoBehaviour
             float alpha = (-1.0f * B + Mathf.Sqrt(B * B - 4.0f * A * C))/(2 * A);
             interSection[i] = (1.0f - alpha) * wL.particleWorldLine[m-1] + alpha * wL.particleWorldLine[m];
             interSectionVelocity[i] = (wL.particleWorldLine[m] - wL.particleWorldLine[m - 1])/Mathf.Sqrt(Mathf.Abs(-lSqN(wL.particleWorldLine[m] - wL.particleWorldLine[m - 1])));
-            interSectionAcceleration[i] = (interSectionVelocity[i] - ((wL.particleWorldLine[m-1] - wL.particleWorldLine[m - 2])/Mathf.Sqrt(Mathf.Abs(-lSqN(wL.particleWorldLine[m-1] - wL.particleWorldLine[m - 2])))))/Mathf.Sqrt(Mathf.Abs(-lSqN(wL.particleWorldLine[m] - wL.particleWorldLine[m - 1])));
+            //interSectionAcceleration[i] = (wL.particleVelWorldLine[m] - wL.particleVelWorldLine[m - 1])/Mathf.Sqrt(Mathf.Abs(-lSqN(wL.particleWorldLine[m] - wL.particleWorldLine[m - 1])));
             //Debug.Log($"particleWorldLine[m] - particleWorldLine[m - 1] = {wL.particleWorldLine[m] - wL.particleWorldLine[m - 1]}, lSqN(wL.particleWorldLine[m] - wL.particleWorldLine[m - 1]) = {lSqN(wL.particleWorldLine[m] - wL.particleWorldLine[m - 1])}");
             Vector3 particleLatticeDist = LatticePosWorld4[i] - interSection[i];
-            latticeAvector[i] = wL.qparticle * ((1/(particleLatticeDist).magnitude)/interSectionVelocity[i].w) * interSectionVelocity[i];
-            diffLatticeAvector[i] = lienardWiechert(LatticePosWorld4[i], new Vector4(0.0f, 0.0f, 0.0f, 1.0f),interSection[i], interSectionVelocity[i], interSectionAcceleration[i]);
+            //diffLatticeAvector[i] = cSS.GaugeField(LatticePosWorld4[i]);
+            diffLatticeAvector[i] = lienardWiechert(LatticePosWorld4[i], new Vector4(0.0f, 0.0f, 0.0f, 1.0f), interSection[i], interSectionVelocity[i], interSectionAcceleration[i]);
             //Debug.Log($"particleLatticeDist = {particleLatticeDist}, interSection[{i}] = {interSection[i]}, interSectionVelocity[{i}] = {interSectionVelocity[i]}, interSectionAcceleration[{i}] = {interSectionAcceleration[i]}, latticeAvector[{i}] = {latticeAvector[i]}");
-            Debug.Log($"diffLatticeAvector[{i}] = {diffLatticeAvector[i]}");
         }
+        Debug.Log($"worldlineIndices[63]  = {worldlineIndices[63]}");
+        Debug.Log($"diffLatticeAvector[63] = {diffLatticeAvector[63]}");
         int j = Shader.PropertyToID("f");
-        cs.SetMatrixArray("f", diffLatticeAvector);
+        //Debug.Log($"j = {j}");
+        cs.SetMatrixArray(j, diffLatticeAvector);
     }
     private float lSqN(Vector4 v) //Lorentzian squared norm
     {
@@ -114,95 +116,125 @@ public class LatticeIntersection : MonoBehaviour
 
     private Matrix4x4 lienardWiechert(Vector4 observePosition, Vector4 observeVelocity, Vector4 particlePosition, Vector4 particleVelocity, Vector4 particleAcceleration){
         Matrix4x4 dA;
-        Vector4 Rvector = observePosition - particlePosition;
-        float R = (new Vector3(Rvector.x, Rvector.y, Rvector.z)).magnitude;
-        Vector3 n = new Vector3(Rvector.x / R, Rvector.y / R, Rvector.z / R);
-        Vector3 u = new Vector3(particleVelocity.x, particleVelocity.y, particleVelocity.z);
-        Vector3 uP = observeVelocity;
-        float ndotu = (Rvector.x * particleVelocity.x + Rvector.y * particleVelocity.y + Rvector.z * particleVelocity.z) / R;
-        float ndotuP = (Rvector.x * observeVelocity.x + Rvector.y * observeVelocity.y + Rvector.z * observeVelocity.z) / R;
-        float ndotalpha = (Rvector.x * particleAcceleration.x + Rvector.y * particleAcceleration.y + Rvector.z * particleAcceleration.z) / R;
-        float beta = particleVelocity.w - ndotu;
-        
-        dA.m01 = (-wL.qparticle/(4 * Mathf.PI)) * (n.x * u.y/(beta * R * R))
-                    +(wL.qparticle/(4 * Mathf.PI * beta)) * (-1/ndotu) * (
-                        ((1/R*R) * (u.magnitude * u.magnitude/(ndotu * ndotu)) - (1/R) * (ndotalpha/(ndotu * ndotu))) * n.x * u.y
-                        + (n.x/(ndotu * R)) * particleAcceleration.y
-                        + (u.y/(ndotu * R * R)) * (u.x + n.x * ndotu)
-                    );
-        
-        dA.m02 = (-wL.qparticle/(4 * Mathf.PI)) * (n.x * u.z/(beta * R * R))
-                    +(wL.qparticle/(4 * Mathf.PI * beta)) * (-1/ndotu) * (
-                        ((1/R*R) * (u.magnitude * u.magnitude/(ndotu * ndotu)) - (1/R) * (ndotalpha/(ndotu * ndotu))) * n.x * u.z
-                        + (n.x/(ndotu * R)) * particleAcceleration.z
-                        + (u.z/(ndotu * R * R)) * (u.x + n.x * ndotu)
-                    );
-        
-        dA.m10 = (-wL.qparticle/(4 * Mathf.PI)) * (n.y * u.x/(beta * R * R))
-                    +(wL.qparticle/(4 * Mathf.PI * beta)) * (-1/ndotu) * (
-                        ((1/R*R) * (u.magnitude * u.magnitude/(ndotu * ndotu)) - (1/R) * (ndotalpha/(ndotu * ndotu))) * n.y * u.x
-                        + (n.y/(ndotu * R)) * particleAcceleration.x
-                        + (u.x/(ndotu * R * R)) * (u.y + n.y * ndotu)
-                    );
+        Vector3 l = new Vector3(particlePosition.x-observePosition.x,
+                                particlePosition.y-observePosition.y,
+                                particlePosition.z-observePosition.z);
+        float lsquared = l.magnitude * l.magnitude;
+        Vector3 lhat = l.normalized;
+        Vector3 un = new Vector3(particleVelocity.x,
+                                particleVelocity.y,
+                                particleVelocity.z);
+        Vector3 an = new Vector3(particleAcceleration.x,
+                                particleAcceleration.y,
+                                particleAcceleration.z);
+        float lhatdotun = Vector3.Dot(lhat, un);
+        float lhatdotan = Vector3.Dot(lhat, an);
+        float qparticle = 40.0f;
 
-        dA.m12 = (-wL.qparticle/(4 * Mathf.PI)) * (n.y * u.z/(beta * R * R))
-                    +(wL.qparticle/(4 * Mathf.PI * beta)) * (-1/ndotu) * (
-                        ((1/R*R) * (u.magnitude * u.magnitude/(ndotu * ndotu)) - (1/R) * (ndotalpha/(ndotu * ndotu))) * n.y * u.z
-                        + (n.y/(ndotu * R)) * particleAcceleration.z
-                        + (u.z/(ndotu * R * R)) * (u.y + n.y * ndotu)
+        float factorU0 = particleVelocity.w + lhatdotun;
+        float factorA0 = particleAcceleration.w + lhatdotan;
+
+        float factorOverall = qparticle / (12.56f * lsquared * factorU0 * factorU0 * factorU0);
+        
+        //i = 0, mu = 0, 1, 2, 3
+        dA.m00 = factorOverall * (
+                        particleAcceleration.x * lhat.x * l.magnitude * factorU0
+                        + particleVelocity.x * factorU0 * (
+                                un.x * factorU0 - lhat.x * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        dA.m01 = factorOverall * (
+                        particleAcceleration.y * lhat.x * l.magnitude * factorU0
+                        + particleVelocity.y * factorU0 * (
+                                un.x * factorU0 - lhat.x * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        dA.m02 = factorOverall * (
+                        particleAcceleration.z * lhat.x * l.magnitude * factorU0
+                        + particleVelocity.z * factorU0 * (
+                                un.x * factorU0 - lhat.x * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        dA.m03 = factorOverall * (
+                        particleAcceleration.w * lhat.x * l.magnitude * factorU0
+                        + particleVelocity.w * factorU0 * (
+                                un.x * factorU0 - lhat.x * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        //i = 1, mu = 0, 1, 2, 3
+        dA.m10 = factorOverall * (
+                        particleAcceleration.x * lhat.y * l.magnitude * factorU0
+                        + particleVelocity.x * factorU0 * (
+                                un.y * factorU0 - lhat.y * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        dA.m11 = factorOverall * (
+                        particleAcceleration.y * lhat.y * l.magnitude * factorU0
+                        + particleVelocity.y * factorU0 * (
+                                un.y * factorU0 - lhat.y * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        dA.m12 = factorOverall * (
+                        particleAcceleration.z * lhat.y * l.magnitude * factorU0
+                        + particleVelocity.z * factorU0 * (
+                                un.y * factorU0 - lhat.y * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        dA.m13 = factorOverall * (
+                        particleAcceleration.w * lhat.y * l.magnitude * factorU0
+                        + particleVelocity.w * factorU0 * (
+                                un.y * factorU0 - lhat.y * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        //i = 2, mu = 0, 1, 2, 3
+        dA.m20 = factorOverall * (
+                        particleAcceleration.x * lhat.z * l.magnitude * factorU0
+                        + particleVelocity.x * factorU0 * (
+                                un.z * factorU0 - lhat.z * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        dA.m21 = factorOverall * (
+                        particleAcceleration.y * lhat.z * l.magnitude * factorU0
+                        + particleVelocity.y * factorU0 * (
+                                un.z * factorU0 - lhat.z * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        dA.m22 = factorOverall * (
+                        particleAcceleration.z * lhat.z * l.magnitude * factorU0
+                        + particleVelocity.z * factorU0 * (
+                                un.z * factorU0 - lhat.z * (l.magnitude * factorA0 - 1)
+                            )
+                    );
+        dA.m23 = factorOverall * (
+                        particleAcceleration.w * lhat.z * l.magnitude * factorU0
+                        + particleVelocity.w * factorU0 * (
+                                un.z * factorU0 - lhat.z * (l.magnitude * factorA0 - 1)
+                            )
                     );
         
-        dA.m20 = (-wL.qparticle/(4 * Mathf.PI)) * (n.z * u.x/(beta * R * R))
-                    +(wL.qparticle/(4 * Mathf.PI * beta)) * (-1/ndotu) * (
-                        ((1/R*R) * (u.magnitude * u.magnitude/(ndotu * ndotu)) - (1/R) * (ndotalpha/(ndotu * ndotu))) * n.z * u.x
-                        + (n.z/(ndotu * R)) * particleAcceleration.x
-                        + (u.x/(ndotu * R * R)) * (u.z + n.z * ndotu)
+        dA.m30 = factorOverall * (
+                        particleAcceleration.x * l.magnitude * factorU0
+                        + particleVelocity.x * (
+                                l.magnitude * factorA0 + un.magnitude + particleVelocity.w * lhatdotun
+                            )
                     );
-
-        dA.m21 = (-wL.qparticle/(4 * Mathf.PI)) * (n.z * u.y/(beta * R * R))
-                    +(wL.qparticle/(4 * Mathf.PI * beta)) * (-1/ndotu) * (
-                        ((1/R*R) * (u.magnitude * u.magnitude/(ndotu * ndotu)) - (1/R) * (ndotalpha/(ndotu * ndotu))) * n.z * u.y
-                        + (n.z/(ndotu * R)) * particleAcceleration.y
-                        + (u.y/(ndotu * R * R)) * (u.z + n.z * ndotu)
+        dA.m31 = factorOverall * (
+                        particleAcceleration.y * l.magnitude * factorU0
+                        + particleVelocity.y * (
+                                l.magnitude * factorA0 + un.magnitude + particleVelocity.w * lhatdotun
+                            )
                     );
-        
-        dA.m03 = (-wL.qparticle/(4 * Mathf.PI)) * (n.x * particleVelocity.w/(beta * R * R))
-                    +(wL.qparticle/(4 * Mathf.PI * beta)) * (-1/ndotu) * (
-                        ((1/R*R) * (u.magnitude * u.magnitude/(ndotu * ndotu)) - (1/R) * (ndotalpha/(ndotu * ndotu))) * particleVelocity.w * n.x
-                        + (n.x/(ndotu * R)) * (ndotalpha/particleVelocity.w)
-                        + (particleVelocity.w/(ndotu * R * R)) * (u.x + n.x * ndotu)
+        dA.m32 = factorOverall * (
+                        particleAcceleration.z * l.magnitude * factorU0
+                        + particleVelocity.z * (
+                                l.magnitude * factorA0 + un.magnitude + particleVelocity.w * lhatdotun
+                            )
                     );
-
-        dA.m13 = (-wL.qparticle/(4 * Mathf.PI)) * (n.y * particleVelocity.w/(beta * R * R))
-                    +(wL.qparticle/(4 * Mathf.PI * beta)) * (-1/ndotu) * (
-                        ((1/R*R) * (u.magnitude * u.magnitude/(ndotu * ndotu)) - (1/R) * (ndotalpha/(ndotu * ndotu))) * particleVelocity.w * n.y
-                        + (n.y/(ndotu * R)) * (ndotalpha/particleVelocity.w)
-                        + (particleVelocity.w/(ndotu * R * R)) * (u.y + n.y * ndotu)
-                    );
-
-        dA.m23 = (-wL.qparticle/(4 * Mathf.PI)) * (n.z * particleVelocity.w/(beta * R * R))
-                    +(wL.qparticle/(4 * Mathf.PI * beta)) * (-1/ndotu) * (
-                        ((1/R*R) * (u.magnitude * u.magnitude/(ndotu * ndotu)) - (1/R) * (ndotalpha/(ndotu * ndotu))) * particleVelocity.w * n.z
-                        + (n.z/(ndotu * R)) * (ndotalpha/particleVelocity.w)
-                        + (particleVelocity.w/(ndotu * R * R)) * (u.z + n.z * ndotu)
-                    );
-        
-        dA.m30 = (wL.qparticle/(4 * Mathf.PI * beta)) * (
-                    ((ndotu/(beta * R * R)) - (1/(beta * beta * R)) * (ndotalpha/particleVelocity.w) + (1/(beta * beta * R * R)) * (-u.magnitude * u.magnitude + ndotu * ndotu) + (ndotalpha/(beta * beta * R))) * particleVelocity.x * (ndotuP/observeVelocity.w)
-                    + (particleAcceleration.x/(beta * R)) * (ndotuP/observeVelocity.w)
-                    + (particleVelocity.x/(beta * R * R)) * Vector3.Dot(-u + ndotu * n, uP / observeVelocity.w)
-                    );
-
-        dA.m31 = (wL.qparticle/(4 * Mathf.PI* beta)) * (
-                    ((ndotu/(beta * R * R)) - (1/(beta * beta * R)) * (ndotalpha/particleVelocity.w) + (1/(beta * beta * R * R)) * (-u.magnitude * u.magnitude + ndotu * ndotu) + (ndotalpha/(beta * beta * R))) * particleVelocity.y * (ndotuP/observeVelocity.w)
-                    + (particleAcceleration.y/(beta * R)) * (ndotuP/observeVelocity.w)
-                    + (particleVelocity.y/(beta * R * R)) * Vector3.Dot(-u + ndotu * n, uP / observeVelocity.w)
-                    );
-
-        dA.m32 = (wL.qparticle/(4 * Mathf.PI* beta)) * (
-                    ((ndotu/(beta * R * R)) - (1/(beta * beta * R)) * (ndotalpha/particleVelocity.w) + (1/(beta * beta * R * R)) * (-u.magnitude * u.magnitude + ndotu * ndotu) + (ndotalpha/(beta * beta * R))) * particleVelocity.z * (ndotuP/observeVelocity.w)
-                    + (particleAcceleration.z/(beta * R)) * (ndotuP/observeVelocity.w)
-                    + (particleVelocity.z/(beta * R * R)) * Vector3.Dot(-u + ndotu * n, uP / observeVelocity.w)
+        dA.m33 = factorOverall * (
+                        particleAcceleration.w * l.magnitude * factorU0
+                        + particleVelocity.w * (
+                                l.magnitude * factorA0 + un.magnitude + particleVelocity.w * lhatdotun
+                            )
                     );
 
         Matrix4x4 F;

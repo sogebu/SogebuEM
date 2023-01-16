@@ -93,7 +93,7 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if( Input.GetKey( KeyCode.G )) {
+        if( Input.GetKey( KeyCode.R )) {
 				SceneManager.LoadScene (SceneManager.GetActiveScene().name);
 		}
         if(Input.GetKey(KeyCode.Escape)){

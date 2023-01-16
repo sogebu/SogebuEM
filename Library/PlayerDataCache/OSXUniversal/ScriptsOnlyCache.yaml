@@ -41,19 +41,19 @@ ScriptsOnlyBuild:
     - Class: 108
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 1866}
+      Script: {instanceID: 1868}
     - Class: 114
-      Script: {instanceID: 1932}
+      Script: {instanceID: 1934}
     - Class: 114
-      Script: {instanceID: 3076}
+      Script: {instanceID: 3078}
     - Class: 114
-      Script: {instanceID: 3186}
+      Script: {instanceID: 3188}
     - Class: 114
-      Script: {instanceID: 3702}
+      Script: {instanceID: 3704}
     - Class: 114
-      Script: {instanceID: 4462}
+      Script: {instanceID: 4464}
     - Class: 114
-      Script: {instanceID: 4588}
+      Script: {instanceID: 4590}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 157
@@ -521,7 +521,7 @@ ScriptsOnlyBuild:
     className: SignalEmitter
   - hash:
       serializedVersion: 2
-      Hash: f29b96330c6878314d225af5309cdf14
+      Hash: 7af9c0d29b606b9f73cec8696cf8e5ed
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: WorldLine
@@ -552,4 +552,4 @@ ScriptsOnlyBuild:
   platform: 2
   scenePathNames:
   - Assets/Scenes/SampleScene.unity
-  playerPath: /Users/koichiromacmini/Dropbox/yasuda_relativity/sogebu2020/20220608.app
+  playerPath: /Users/koichiromacmini/Dropbox/yasuda_relativity/sogebu2020/20221205.app
