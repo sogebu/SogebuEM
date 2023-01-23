@@ -38,6 +38,8 @@ public class ComputeShaderScript : MonoBehaviour {
     public float m1;
     public float m2;
 
+    public float gridScale;
+
     #endregion
 
     public Vector4[] particlePosition;
@@ -159,7 +161,7 @@ public class ComputeShaderScript : MonoBehaviour {
                 for(int x = 0; x < X_GRID; x++) {
                     int i = z * (Y_GRID * X_GRID) + y * (X_GRID) + x;
                     //generate position
-                    Position[i] = new Vector3(5 * x - 5 * (float)(X_GRID-1)/2, 5 * y - 5 * (float)(Y_GRID-1)/2, 5 * z - 5 * (float)(Z_GRID-1)/2);
+                    Position[i] = new Vector3((x - (float)(X_GRID-1)/2)/gridScale, (y - (float)(Y_GRID-1)/2)/gridScale, (z - 0.0f * (float)(Z_GRID-1)/2)/gridScale);
                     latticePosition[i] = Position[i];
                     latticePosition[i].w = - (Position[i] - PlayerMove.playrposworldframe3).magnitude;
                     Matrix4x4 emTensor = GaugeField(latticePosition[i]);
@@ -233,7 +235,7 @@ public class ComputeShaderScript : MonoBehaviour {
             particles[i] = new ParticleData {
                 velocity = new Vector3(0.0f, 0.0f, 0.0f),
                 //position = Random.onUnitSphere * 1.1f,
-                position = new Vector3(3.0f, 0.0f, 0.0f),
+                position = new Vector3(0.1f, 0.0f, 0.0f),
                 color = _ParticleColor,
                 scale = 0.02f,
                 ParticlePositionWorld4 = new Vector4(0.0f, 0.0f, 0.0f, 0.0f),

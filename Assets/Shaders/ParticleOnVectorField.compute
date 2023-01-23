@@ -42,7 +42,7 @@ float4x4 R;
 float4 playrposworldframe4;
 float4 playrvelworldframe4;
 
-float4x4 f[125];
+float4x4 f[400];
 
 //A has upper index: (0,1,2,3) is (x,y,z,w), where w is t.
 float4 A(float x, float y, float z, float t)
@@ -169,7 +169,7 @@ void ParticleMain (uint3 id : SV_DispatchThreadID)
     p.ParticlePositionWorld4.w = playrposworldframe4.w - length(playrposworldframe4.xyz - p.ParticlePositionWorld4.xyz);
     float4 positionrestframe = mul(Lplayer, p.ParticlePositionWorld4);
     p.position = positionrestframe.xyz;
-    p.scale = 0.3;
+    p.scale = 0.05;
 
     _ParticleDataBuffer[index] = p;
 }

@@ -295,7 +295,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -8}
+  m_LocalPosition: {x: 0, y: 0, z: -0.35}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -481,14 +481,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 377f46bf2ad5a4d258faae05248ef7cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  X_GRID: 5
-  Y_GRID: 5
-  Z_GRID: 5
+  X_GRID: 20
+  Y_GRID: 20
+  Z_GRID: 1
   X_THREAD: 1
   q1: 0
   q2: 0
   m1: 0
   m2: 0
+  gridScale: 100
   particlePosition: []
   particleVelocity: []
   latticePosition: []
@@ -508,7 +509,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9549e471ac5424dd6968eca2be2d7e22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ObjectScale: {x: 300, y: 300, z: 300}
+  ObjectScale: {x: 10, y: 10, z: 10}
   csScript: {fileID: 1510263236}
   InstanceMesh: {fileID: 4300000, guid: 1aaa39cd6c80745a49b9099597969d07, type: 2}
   InstanceRenderMaterial: {fileID: 2100000, guid: 18f4d230459e246dc87df41a7b2646a2,
@@ -541,7 +542,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e273c8a33df144a4919c371a2eb8b48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BObjectScale: {x: 300, y: 300, z: 300}
+  BObjectScale: {x: 10, y: 10, z: 10}
   csScript: {fileID: 1510263236}
   InstanceMesh: {fileID: 4300000, guid: 1aaa39cd6c80745a49b9099597969d07, type: 2}
   InstanceRenderMaterial: {fileID: 2100000, guid: 8cb8e9e49eed34855808083f892e561d,
@@ -560,7 +561,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ParticlePosWorld4: {x: 0, y: 0, z: 0, w: 0}
   ParticleVelWorld4: {x: 0, y: 0, z: 0, w: 0}
-  Const: 0
+  Const: 10
   _cs: {fileID: 7200000, guid: db47c581e06564531948a2c49ee900a4, type: 3}
   qparticle: 1000
   particleWorldLine:
