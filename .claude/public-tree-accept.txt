@@ -1,0 +1,48 @@
+# public-tree-accept.txt — scan-public-tree.sh の棚卸しで「見た上で残す」 と決めた token。
+#
+# ⚠️ pre-commit gate には効かない (= 新しい書き込みは今までどおり止まる)。 効くのは
+#    claude-config/scripts/scan-public-tree.sh の棚卸しだけ。
+# ⚠️ ここに書けるのは **既に tree の他の場所に在る文字列** だけ (= 走査が検査する)。
+#
+# どれも owner が書いた物ではない:
+#   - 20220405.app (ビルド済みの macOS 版) に同梱された Mono runtime の設定 (browscap.ini の
+#     crawler 連絡先・版番号、 WSDL help の example) = upstream の file
+#   - Assets の .fbx に Blender の FBX exporter が書く「support mail」 の comment = exporter 作者の公開連絡先
+
+AlgoFeedback@miva.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+BecomeBot@exava.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+Exabot@exava.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+admin@google.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+andreas.heidoetting@thomson-webcast.net   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+bot@bot.bot   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+crawl@kyluka.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+crawler@ah-ha.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+crawler@exactseek.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+crawler@pdfind.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+crawler@www.fi   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+crawler_admin@podtech.net   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+gazz@nttr.co.jp   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+graeme@inclue.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+gue@cis.uni-muenchen.de   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+ideasman42@gmail.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+info@domaincrawler.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+info@netcraft.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+knight@zook.in   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+leehyun@cs.toronto.edu   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+lluis@ximian.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+lorkyll@444.net   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+nhnbot@naver.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+noc@opendns.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+shelob@gmx.net   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+sitemonitor@dnsvr.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+slurp@inktomi.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+support@blogpulse.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+support@meta-spinner.de   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+support@tumblr.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+tspyyp@tom.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+vertical-crawl-support@yahoo-inc.com   # 同梱 Mono runtime (browscap.ini 等) か FBX exporter の upstream 連絡先
+1.0.0.0   # 同梱 Mono runtime の assembly / browser の版番号 (IP ではない)
+1.1.0.0   # 同梱 Mono runtime の assembly / browser の版番号 (IP ではない)
+2.0.0.0   # 同梱 Mono runtime の assembly / browser の版番号 (IP ではない)
+3.5.0.0   # 同梱 Mono runtime の assembly / browser の版番号 (IP ではない)
+4.0.0.0   # 同梱 Mono runtime の assembly / browser の版番号 (IP ではない)
