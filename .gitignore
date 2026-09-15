@@ -1,1 +1,11 @@
 .DS_Store
+
+# Unity が生成する物 (= 開いたときに作り直される。 開発機の絶対 path が焼かれるので追跡しない)
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/.vs/
+*.csproj
+*.sln
